@@ -1,0 +1,42 @@
+# Rust
+target/
+Cargo.lock
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.so
+*.abi3.so
+*.dylib
+
+# Virtual environment
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# maturin
+*.whl
+
+# uv
+uv.lock
+
+# Benchmark debug scripts
+benchmarks/debug_hl7apy.py
+
+# CodeGraph
+.codegraph/
+
+# pytest
+.pytest_cache/

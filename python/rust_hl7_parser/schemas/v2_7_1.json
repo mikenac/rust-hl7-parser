@@ -1,0 +1,13 @@
+{
+  "version": "2.7.1",
+  "inherits": "2.7",
+  "segments": {
+    "PID": {
+      "desc": "Patient Identification",
+      "max_fields": 39,
+      "fields": {
+        "38": {"name": "Production Class Code", "type": "CWE", "required": false}
+      }
+    }
+  }
+}

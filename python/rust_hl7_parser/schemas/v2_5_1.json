@@ -1,0 +1,26 @@
+{
+  "version": "2.5.1",
+  "inherits": "2.5",
+  "segments": {
+    "MSH": {
+      "desc": "Message Header",
+      "max_fields": 21,
+      "fields": {}
+    },
+    "PID": {
+      "desc": "Patient Identification",
+      "max_fields": 39,
+      "fields": {
+        "38": {"name": "Production Class Code", "type": "CE", "required": false}
+      }
+    },
+    "PV1": {
+      "desc": "Patient Visit",
+      "max_fields": 53,
+      "fields": {
+        "52": {"name": "Other Healthcare Provider", "type": "XCN", "required": false},
+        "53": {"name": "Service Episode Description", "type": "ST", "required": false}
+      }
+    }
+  }
+}

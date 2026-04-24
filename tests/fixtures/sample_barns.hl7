@@ -1,0 +1,182 @@
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250710142613092+0100||ADT^A21^ADT_A21|RFF_50492|P|2.4|50492||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A21|20250710142611033+0100||150||20250710142500000+0100
+PID|1||1200001661^^^RFF^FACIL~AADYF1^^^NHS^NHS||Xxlilixx^Baby^^^Mr^^CURRENT^||20240815|1|||Barnsley Hospital^^^^S75 2EP^UNK^CurrentM^^^^^20240815^""|||^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|
+PD1|||Practice Code Is Not Known^^V81999|G9999998^Unknown^GP^^^Dr^^^^^^^GP
+PV1|1|I|Childrens Ward^CWS^CWS:Bbay:BedB5_CWS:BBay^RFFAA|22|""|Childrens Ward^CWS^CWS:Bbay:BedB5_CWS:BBay^RFFAA|^^^^^^^^^^^^^|^^^^^^^^^^^^^|C6054431^Bullas^Dominic^""^^Dr^^^^^^^CONS^|300|^^^^^^^^|||19|||C6054431^Bullas^Dominic^^^Dr^^^^^^^CONS|01|I2500000337|||||||||||||||||||||||^^^^^^^^|^^^^^^^^|20250619130300000+0100||||||I2500000364EI2500000492A^^CEWS
+PV2|||||||||||||||||||||||||||||||||||||||||||||||20250711080000000+0100
+ZU1|""|NS|""|20250710142500000+0100|""|30101|""|""||8|||||||||NS|8||N||""
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711094404540+0100||ADT^A04^ADT_A01|RFF_50493|P|2.4|50493||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A04|20250711094401390+0100||400||20250711094302000+0100
+PID|1||1200001785^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqbohdiqqq^^^Miss^^CURRENT^||20030110|2|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250303^""|||^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|""^^^^^^^^^^^^^|""^^^^^^^^^^^^^|C6135043^Shaw^Thomas^""^^Dr^^^^^^^CONS^|180|^^^^^^^^||||||||A2500000283A^F2025000027|||||||||||||||||NS|NS|||||^^^^^^^^|^^^^^^^^|20250711094201000+0100||||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+ZU1|||||||""|||8|||SELRF|||||||||||
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711094832433+0100||ADT^A03^ADT_A03|RFF_50494|P|2.4|50494||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A03|20250711094831243+0100||410||20250711094853000+0100
+PID|1||1200001785^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqbohdiqqq^^^Miss^^CURRENT^||20030110|2|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250303^""|||^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|C6135043^Shaw^Thomas^""^^Dr^^^^^^^CONS^|""^^^^^^^^^^^^^|C6135043^Shaw^Thomas^""^^Dr^^^^^^^CONS^|180|^^^^^^^^||||||||A2500000283A^F2025000027|||||||||||||||||SDEC|NS|||||^^^^^^^^|^^^^^^^^|20250711094201000+0100|20250711094853000+0100|||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+ZU1|||||||""|||8|||SELRF|||||||||||
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711100631789+0100||ADT^A04^ADT_A01|RFF_50495|P|2.4|50495||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A04|20250711100627590+0100||400||20250711100502000+0100
+PID|1||1200001750^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqnovemberqqq^^^Mr^^CURRENT^||19870101|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744998855^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|""^^^^^^^^^^^^^|""^^^^^^^^^^^^^|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|300|^^^^^^^^||||||||A2500000284A^F2025000028|||||||||||||||||NS|NS|||||^^^^^^^^|^^^^^^^^|20250711100501000+0100||||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+AL1|1||AA:DA:A:1489^Drug Allergy: phenoxymethylpenicillin^ALLERGEN|1^^""|Anaphylaxis|20250414
+ZU1|||||||""|||8|||SELRF|||||||||||
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711101143185+0100||ADT^A03^ADT_A03|RFF_50496|P|2.4|50496||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A03|20250711101142017+0100||410||20250711101053000+0100
+PID|1||1200001750^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqnovemberqqq^^^Mr^^CURRENT^||19870101|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744998855^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|""^^^^^^^^^^^^^|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|300|^^^^^^^^||||||||A2500000284A^F2025000028|||||||||||||||||SDEC|NS|||||^^^^^^^^|^^^^^^^^|20250711100501000+0100|20250711101053000+0100|||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+ZU1|||||||""|||8|||SELRF|||||||||||
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711101336852+0100||ADT^A04^ADT_A01|RFF_50497|P|2.4|50497||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A04|20250711101335613+0100||400||20250711101302000+0100
+PID|1||1200001750^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqnovemberqqq^^^Mr^^CURRENT^||19870101|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744998855^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|""^^^^^^^^^^^^^|""^^^^^^^^^^^^^|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|300|^^^^^^^^||||||||A2500000285A^F2025000029|||||||||||||||||NS|NS|||||^^^^^^^^|^^^^^^^^|20250711101301000+0100||||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+AL1|1||AA:DA:A:1489^Drug Allergy: phenoxymethylpenicillin^ALLERGEN|1^^""|Anaphylaxis|20250414
+AL1|2||CA:REGATT:B:^Regular Attender^ALERT|0^^""|""|20250711
+ZU1|||||||""|||8|||SELRF|||||||||||
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711101336633+0100||ADT^A31^ADT_A05|RFF_50498|P|2.4|50498||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A31|20250711101335677+0100||||20250711101335677+0100
+PID|1||1200001750^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqnovemberqqq^^^Mr^^CURRENT^||19870101|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744998855^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+ROL|C85009|UP|FHCP|G3299166^Kakoty^PC^^^Dr^^^^^^^GP|||||||170 Sheffield Road^Barnsley^South Yorkshire^""^S70 4NW^GBR^^""
+ROL|C85009001|UP|FHCP|G3299166^Kakoty^PC^^^Dr^^^^^^^GP|||||||Worsbrough Health Centre^Oakdale^Worsbrough^Barnsley^S70 5EG^GBR^^South Yorkshire
+AL1|1||AA:DA:A:1489^Drug Allergy: phenoxymethylpenicillin^ALLERGEN|1^^""|Anaphylaxis|20250414
+AL1|2||CA:REGATT:B:^Regular Attender^ALERT|0^^""|""|20250711
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711101646548+0100||ADT^A03^ADT_A03|RFF_50499|P|2.4|50499||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A03|20250711101645370+0100||410||20250711101653000+0100
+PID|1||1200001750^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqnovemberqqq^^^Mr^^CURRENT^||19870101|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744998855^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|""^^^^^^^^^^^^^|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|300|^^^^^^^^||||||||A2500000285A^F2025000029|||||||||||||||||SDEC|NS|||||^^^^^^^^|^^^^^^^^|20250711101301000+0100|20250711101653000+0100|||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+ZU1|||||||""|||8|||SELRF|||||||||||
+
+MSH|^~\&|MEDWAY^6.1.14.0|RFF|ROUTE|ROUTE|20250711134244964+0100||REF^I12^REF_I12|RFF_50500|P|2.4|50500||""|""|GBR|UNICODE UTF-8|EN||""
+RF1|REF|R|CONS|NOOUT|03|^^O2500000870R|20250711134200000+0100|20250711134245011+0100|20250711134200000+0100|1^^^NS|RFF00000000001097849^^RFF
+PRD|RT^^^130|""||^^^RFFAA^^^^^Barnsley Hospital|||""
+PRD|RF|Kakoty^PC^^^Dr|||||G3299166
+PID|1||1200001781^""^^RFF^FACIL~""^""^^NHS^NHS||Qqqpasupgradeqqq^Qqqmarkqqq^^^Mr^^CURRENT||20030106|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^^^^20250303&""|||||NS|K1|||||A|||||||""|N|""|NSTS03
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+NK1|1|""|NS||||NK
+NK1|2|""|NS||||EC
+
+MSH|^~\&|MEDWAY^6.1.14.0|RFF|ROUTE|ROUTE|20250711134243855+0100||REF^I13^REF_I12|RFF_50501|P|2.4|50501||""|""|GBR|UNICODE UTF-8|EN||""
+RF1|REF|R|CONS|NOOUT|03|^^O2500000870R|20250711134200000+0100|20250711134243917+0100|20250711134200000+0100|1^^^NS|RFF00000000001097849^^RFF
+PRD|RT^^^130|""||^^^RFFAA^^^^^Barnsley Hospital|||""
+PRD|RF|Kakoty^PC^^^Dr|||||G3299166
+PID|1||1200001781^""^^RFF^FACIL~""^""^^NHS^NHS||Qqqpasupgradeqqq^Qqqmarkqqq^^^Mr^^CURRENT||20030106|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^^^^20250303&""|||||NS|K1|||||A|||||||""|N|""|NSTS03
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+NK1|1|""|NS||||NK
+NK1|2|""|NS||||EC
+
+MSH|^~\&|MEDWAY^6.1.14.0|RFF|ROUTE|ROUTE|20250711134335465+0100||REF^I13^REF_I12|RFF_50502|P|2.4|50502||""|""|GBR|UNICODE UTF-8|EN||""
+RF1|APPT|R|CONS|NOOUT|03|^^O2500000870R|20250711134200000+0100|20250711134335512+0100|20250711134200000+0100|1^^^NS|RFF00000000001097849^^RFF
+PRD|RT^^^130|Firan^Anne-Marie^^^Miss||^^^RFFAA^^^^^Barnsley Hospital|||C6109863
+PRD|RF|Kakoty^PC^^^Dr|||||G3299166
+PID|1||1200001781^""^^RFF^FACIL~""^""^^NHS^NHS||Qqqpasupgradeqqq^Qqqmarkqqq^^^Mr^^CURRENT||20030106|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^^^^20250303&""|||||NS|K1|||||A|||||||""|N|""|NSTS03
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+NK1|1|""|NS||||NK
+NK1|2|""|NS||||EC
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250711134335590+0100||ADT^A05^ADT_A05|RFF_50503|P|2.4|50503||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A05|20250711134334460+0100||200||20250711150000000+0100
+PID|1||1200001781^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqmarkqqq^^^Mr^^CURRENT^||20030106|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250303^""|||^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|O|AMF17S Ophthalmology^AMF17S^""^RFFAA^130 Glaucoma Fup^130GLFUP^130 Glaucoma Fup^1^""||||""|G3299166^Kakoty^PC^""^^Dr^^^^^^^GP|C6109863^Firan^Anne-Marie^""^^Miss^^^^^^^CONS|130||||||||01|O2500000870R^O2500000556A|||||||||||||||||""|||||||||
+PV2||||||||20250711150000000+0100|||||||||||||||||R|||||||||||||""
+ZU1|||||||""|||8|||03|1||||||||||
+ZU3|""|""|0|NS|NS|||||||03|^^^NS^Not Set
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250714141252475+0100||ADT^A03^ADT_A03|RFF_50504|P|2.4|50504||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A03|20250714141249447+0100||140||20250714141200000+0100
+PID|1||1200001535^^^RFF^FACIL~9732273097^^^NHS^NHS||Xxtestpatientxx^Xxxtessatwoxxx^Wendy^^Ms^^CURRENT^||20231103|2|||5 PARKLANDS MOBILE HOMES^^^SCUNTHORPE^DN17 1SW^GBR^CurrentM^^^^^20240221^""||01226432771^PHONE^^|^^^^^^^^|^^^^^||C1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||Practice Code Is Not Known^^V81999|G9999998^Unknown^GP^^^Dr^^^^^^^GP
+NK1|1||||^PHONE^^email@email.com~^MOB^^email@email.com||
+NK1|2||||^PHONE^^email@email.com~^MOB^^email@email.com||
+PV1|1|I|Ward 31 Gastroenterology^WD31^WD31:WD31:Bed06_WD31:WD31^RFFAA|21|""|^^^RFFAA|^^^^^^^^^^^^^|^^^^^^^^^^^^^|C6054431^Bullas^Dominic^""^^Dr^^^^^^^CONS^|180|^^^^^^^^|||19|||C6054431^Bullas^Dominic^^^Dr^^^^^^^CONS|01|I2500000437|||||||||||||||||6|40|||||^^^^^^^^|^^^^^^^^|20250709084800000+0100|20250714141200000+0100|||||I2500000464EI2500000490AI2500000522B^^CEWSTR
+ZU1|""|NS|""|20250709084800000+0100|20250714141200000+0100|30101|""|""||8|||||||||NS|8||N||""
+
+MSH|^~\&|CFPAS|ROUTE|BSY|JAC|20250714141255|65b9c273-46eb-485c-92b0-13e780557606|RRD^O14^RRD_O14|781|P|2.3|||AL|AL|826|ASCII|EN
+MSA|AA|781|||D
+PID||9732273097|1200001535^^^^HOSP||Xxtestpatientxx^Xxxtessatwoxxx Wendy||20231103|2|||5 PARKLANDS MOBILE HOMES^Pogmoor Road^^SCUNTHORPE^DN17 1SW||01226432771
+ORC|NW|||||N|||20250714141255|^Green^Richard|^Green^Richard
+RXD|1|D16655^DABRAFENIB 10MG DISPERSIBLE TABLET^JAC^^^JAC|20250714141255|1|^Tablet^JAC|^Tablets^JAC|99992|28|ONCE daily at MIDNIGHT|||||N|^N^JAC
+RXR|141^Oral^JAC
+ORC|NW|||||N|||20250714141255|^Green^Richard|^Green^Richard
+RXD|2|D12743^IBUPROFEN  200 mg Tablets^JAC^^^JAC|20250714141255|400|^mg^JAC|^Tablets^JAC|99991|28|ONCE daily at MIDNIGHT|||||N|^Y^JAC
+RXR|141^Oral^JAC
+ORC|NW|||||N|||20250714141255|^Green^Richard|^Green^Richard
+RXD|3|D14150^PARACETAMOL    500 mg Soluble Tablets^JAC^^^JAC|20250714141255|1000|^mg^JAC|^Soluble Tablets^JAC|99993|28|ONCE daily at MIDNIGHT|||||N|^Y^JAC
+RXR|141^Oral^JAC
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250714141447458+0100||ADT^A01^ADT_A01|RFF_50505|P|2.4|50505||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A01|20250714141446507+0100||100||20250714141400000+0100
+PID|1||1200001535^^^RFF^FACIL~9732273097^^^NHS^NHS||Xxtestpatientxx^Xxxtessatwoxxx^Wendy^^Ms^^CURRENT^||20231103|2|||5 PARKLANDS MOBILE HOMES^^^SCUNTHORPE^DN17 1SW^GBR^CurrentM^^^^^20240221^""||01226432771^PHONE^^|^^^^^^^^|^^^^^||C1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||Practice Code Is Not Known^^V81999|G9999998^Unknown^GP^^^Dr^^^^^^^GP
+PV1|1|I|Ward 31 Gastroenterology^WD31^WD31:WD31:Bed13_WD31:WD31^RFFAA|21|""|^^^RFFAA|^^^^^^^^^^^^^|^^^^^^^^^^^^^|C6054431^Bullas^Dominic^^^Dr^^^^^^^CONS^|180|^^^^^^^^|||19|||C6054431^Bullas^Dominic^^^Dr^^^^^^^CONS|01|I2500000439|||||||||||||||||||||||^^^^^^^^|^^^^^^^^|20250714141400000+0100||||||I2500000466EI2500000493AI2500000524B^^CEWSTR
+AL1|1||AA:DA:A:1129^Drug Allergy: paracetamol^ALLERGEN|1^^""|Cough|20250219
+ZU1|""|NS|""|20250714141400000+0100||30101|""|""||8|||||||||NS|8||N||""
+
+MSH|^~\&|CFPAS|ROUTE|BSY|JAC|20250715105518|6a2cf6ee-d6de-4a8a-8fd4-daf432331545|RRD^O14^RRD_O14|782|P|2.3|||AL|AL|826|ASCII|EN
+MSA|AA|782|||D
+PID||9732273097|1200001535^^^^HOSP||Xxtestpatientxx^Xxxtessatwoxxx Wendy||20231103|2|||5 PARKLANDS MOBILE HOMES^Pogmoor Road^^SCUNTHORPE^DN17 1SW||01226432771
+ORC|NW|||||N|||20250715105518|^Green^Richard|^Green^Richard
+RXD|1|D12743^IBUPROFEN  200 mg Tablets^JAC^^^JAC|20250715105518|400|^mg^JAC|^Tablets^JAC|99989|28|ONCE daily at 3am|||||N|^N^JAC
+RXR|141^Oral^JAC
+ORC|NW|||||N|||20250715105518|^Green^Richard|^Green^Richard
+RXD|2|D14150^PARACETAMOL    500 mg Soluble Tablets^JAC^^^JAC|20250715105518|1000|^mg^JAC|^Soluble Tablets^JAC|99990|28|ONCE daily at 7am|||||N|^Y^JAC
+RXR|141^Oral^JAC
+ORC|NW|||||N|||20250715105518|^Green^Richard|^Green^Richard
+RXD|3|D14601^RAMIPRIL  1.25 mg Capsules^JAC^^^JAC|20250715105518|1.25|^mg^JAC|^Capsules^JAC|99988|28|ONCE daily at 8am|||||N|^Y^JAC
+RXR|141^Oral^JAC
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250715111519373+0100||ADT^A31^ADT_A05|RFF_50506|P|2.4|50506||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A31|20250715111517350+0100||||20250715111517350+0100
+PID|1||1200001388^^^RFF^FACIL~^^^NHS^NHS||Xxxallergyinterfacexxx^Xxxpaulxxx^^^Mr^^CURRENT^||19780904|1|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20231002^""|||^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+ROL|C85009|UP|FHCP|G3299166^Kakoty^PC^^^Dr^^^^^^^GP|||||||170 Sheffield Road^Barnsley^South Yorkshire^""^S70 4NW^GBR^^""
+ROL|C85009001|UP|FHCP|G3299166^Kakoty^PC^^^Dr^^^^^^^GP|||||||Worsbrough Health Centre^Oakdale^Worsbrough^Barnsley^S70 5EG^GBR^^South Yorkshire
+AL1|1||AA:MA:A:161^Non Drug Allergy: Wool^ALLERGEN|1^^""|Rash|20241029
+
+MSH|^~\&|CFPAS|ROUTE|BSY|JAC|20250715120318|46dddfcb-0df5-4bdc-a920-9bfce513bbf5|RRD^O14^RRD_O14|783|P|2.3|||AL|AL|826|ASCII|EN
+MSA|AA|783|||D
+PID||9732273097|1200001535^^^^HOSP||Xxtestpatientxx^Xxxtessatwoxxx Wendy||20231103|2|||5 PARKLANDS MOBILE HOMES^Pogmoor Road^^SCUNTHORPE^DN17 1SW||01226432771
+ORC|NW|||||N|||20250715120318|^Green^Richard|^Green^Richard
+RXD|1|D12743^IBUPROFEN  200 mg Tablets^JAC^^^JAC|20250715120318|400|^mg^JAC|^Tablets^JAC|99989|28|ONCE daily at 3am|||||N|^N^JAC
+RXR|141^Oral^JAC
+ORC|NW|||||N|||20250715120318|^Green^Richard|^Green^Richard
+RXD|2|D14150^PARACETAMOL    500 mg Soluble Tablets^JAC^^^JAC|20250715120318|1000|^mg^JAC|^Soluble Tablets^JAC|99990|28|ONCE daily at 7am|||||N|^Y^JAC
+RXR|141^Oral^JAC
+ORC|NW|||||N|||20250715120318|^Green^Richard|^Green^Richard
+RXD|3|D14601^RAMIPRIL  1.25 mg Capsules^JAC^^^JAC|20250715120318|1.25|^mg^JAC|^Capsules^JAC|99988|28|ONCE daily at 8am|||||N|^Y^JAC
+RXR|141^Oral^JAC
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250716094925592+0100||ADT^A31^ADT_A05|RFF_50507|P|2.4|50507||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A31|20250716094924003+0100||||20250716094924003+0100
+PID|1||1200001759^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqwhiskeyqqq^^^Miss^^CURRENT^||19960101|2|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744559988^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+ROL|C85009|UP|FHCP|G3299166^Kakoty^PC^^^Dr^^^^^^^GP|||||||170 Sheffield Road^Barnsley^South Yorkshire^""^S70 4NW^GBR^^""
+ROL|C85009001|UP|FHCP|G3299166^Kakoty^PC^^^Dr^^^^^^^GP|||||||Worsbrough Health Centre^Oakdale^Worsbrough^Barnsley^S70 5EG^GBR^^South Yorkshire
+
+MSH|^~\&|CSCLRC|RFF|TIE|RFF|20250716095026749+0100||ADT^A04^ADT_A01|RFF_50508|P|2.4|50508||AL|NE|GBR|UTF-8|EN||LZO_R2 _4
+EVN|A04|20250716095024993+0100||400||20250716094902000+0100
+PID|1||1200001759^^^RFF^FACIL~^^^NHS^NHS||Qqqpasupgradeqqq^Qqqwhiskeyqqq^^^Miss^^CURRENT^||19960101|2|||Barnsley Hospital NHS^Pogmoor Road^^Barnsley^S75 2EP^GBR^CurrentM^South Yorkshire^South Yorkshire^^^20250103^""||07744559988^MOB^^|^^^^^^^^|^^^^^||K1|^^^^^||^^|^^^^^|A||||^^^^^|^^^^^|^^^^^|""|N|""
+PD1|||The Kakoty Practice^^C85009~Kakoty Pc ( Worsbrough Dale )^^C85009001|G3299166^Kakoty^PC^^^Dr^^^^^^^GP
+PV1|1|E|SDEC Frailty^SDECF^SDECF:WR^RFFAA|||^^^RFFAA|""^^^^^^^^^^^^^|""^^^^^^^^^^^^^|C6051136^Shakespeare^Kathleen^""^^Dr^^^^^^^CONS^|300|^^^^^^^^||||||||A2500000286A^F2025000030|||||||||||||||||NS|NS|||||^^^^^^^^|^^^^^^^^|20250716094901000+0100||||||
+PV2||||||||||||||||||||||||||||||||||||||Walk in
+ZU1|||||||""|||8|||SELRF|||||||||||

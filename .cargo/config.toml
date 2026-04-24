@@ -1,0 +1,18 @@
+# Linker flags for bare `cargo test` on macOS (aarch64-apple-darwin).
+#
+# PyO3's `extension-module` feature intentionally suppresses the libpython link
+# so that the final `.so` extension module does not hard-link to a specific
+# libpython dylib (a requirement for abi3 wheels).  This is correct for
+# `maturin build`, but it means a plain `cargo test` binary has undefined
+# symbols that the macOS static linker rejects by default.
+#
+# `-undefined dynamic_lookup` tells the macOS linker to defer resolution of
+# those symbols until load time.  When `cargo test` is invoked after
+# `maturin develop` the test binary is loaded inside the active Python
+# interpreter and the symbols are satisfied at that point.
+#
+# This flag is safe to leave on permanently: it only affects the test harness
+# binary and any dylib built outside of maturin.  maturin overrides these flags
+# with its own linker invocation when building wheels.
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]

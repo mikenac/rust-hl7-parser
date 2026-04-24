@@ -1,0 +1,146 @@
+{
+  "version": "2.1",
+  "inherits": null,
+  "segments": {
+    "MSH": {
+      "desc": "Message Header",
+      "max_fields": 16,
+      "fields": {
+        "1":  {"name": "Field Separator", "type": "ST", "required": true, "max_length": 1},
+        "2":  {"name": "Encoding Characters", "type": "ST", "required": true, "max_length": 4},
+        "3":  {"name": "Sending Application", "type": "ST", "required": false, "max_length": 15},
+        "4":  {"name": "Sending Facility", "type": "ST", "required": false, "max_length": 20},
+        "5":  {"name": "Receiving Application", "type": "ST", "required": false, "max_length": 15},
+        "6":  {"name": "Receiving Facility", "type": "ST", "required": false, "max_length": 20},
+        "7":  {"name": "Date/Time of Message", "type": "TS", "required": false},
+        "8":  {"name": "Security", "type": "ST", "required": false, "max_length": 40},
+        "9":  {"name": "Message Type", "type": "CM", "required": true, "max_length": 7},
+        "10": {"name": "Message Control ID", "type": "ST", "required": true, "max_length": 20},
+        "11": {"name": "Processing ID", "type": "ID", "required": true, "max_length": 1},
+        "12": {"name": "Version ID", "type": "NM", "required": true, "max_length": 8}
+      }
+    },
+    "EVN": {
+      "desc": "Event Type",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Event Type Code", "type": "ID", "required": true, "max_length": 3},
+        "2": {"name": "Date/Time of Event", "type": "TS", "required": true},
+        "3": {"name": "Date/Time Planned Event", "type": "TS", "required": false},
+        "4": {"name": "Event Reason Code", "type": "ID", "required": false, "max_length": 3},
+        "5": {"name": "Operator ID", "type": "ID", "required": false, "max_length": 5}
+      }
+    },
+    "PID": {
+      "desc": "Patient Identification",
+      "max_fields": 16,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Patient ID (External)", "type": "CK", "required": false},
+        "3":  {"name": "Patient ID (Internal)", "type": "CK", "required": true},
+        "4":  {"name": "Alternate Patient ID", "type": "CK", "required": false},
+        "5":  {"name": "Patient Name", "type": "PN", "required": true},
+        "7":  {"name": "Date of Birth", "type": "DT", "required": false},
+        "8":  {"name": "Sex", "type": "ID", "required": false, "max_length": 1}
+      }
+    },
+    "PV1": {
+      "desc": "Patient Visit",
+      "max_fields": 44,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Patient Class", "type": "ID", "required": true, "max_length": 1},
+        "3":  {"name": "Assigned Patient Location", "type": "CM", "required": false},
+        "7":  {"name": "Attending Doctor", "type": "CN", "required": false},
+        "10": {"name": "Hospital Service", "type": "ID", "required": false, "max_length": 3},
+        "19": {"name": "Visit Number", "type": "CK", "required": false}
+      }
+    },
+    "NK1": {
+      "desc": "Next of Kin",
+      "max_fields": 13,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Name", "type": "PN", "required": false},
+        "3": {"name": "Relationship", "type": "CE", "required": false},
+        "4": {"name": "Address", "type": "AD", "required": false},
+        "5": {"name": "Phone Number", "type": "TN", "required": false}
+      }
+    },
+    "NTE": {
+      "desc": "Notes and Comments",
+      "max_fields": 3,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": false},
+        "2": {"name": "Source of Comment", "type": "ID", "required": false, "max_length": 8},
+        "3": {"name": "Comment", "type": "TX", "required": false}
+      }
+    },
+    "MSA": {
+      "desc": "Message Acknowledgment",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Acknowledgment Code", "type": "ID", "required": true, "max_length": 2},
+        "2": {"name": "Message Control ID", "type": "ST", "required": true, "max_length": 20},
+        "3": {"name": "Text Message", "type": "ST", "required": false, "max_length": 80},
+        "4": {"name": "Expected Sequence Number", "type": "NM", "required": false},
+        "5": {"name": "Delayed Acknowledgment Type", "type": "ID", "required": false, "max_length": 1},
+        "6": {"name": "Error Condition", "type": "CE", "required": false}
+      }
+    },
+    "OBR": {
+      "desc": "Observation Request",
+      "max_fields": 40,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Placer Order Number", "type": "CM", "required": false},
+        "3":  {"name": "Filler Order Number", "type": "CM", "required": false},
+        "4":  {"name": "Universal Service ID", "type": "CE", "required": true},
+        "7":  {"name": "Observation Date/Time", "type": "TS", "required": false},
+        "22": {"name": "Results Report/Status Change Date/Time", "type": "TS", "required": false},
+        "25": {"name": "Result Status", "type": "ID", "required": false, "max_length": 1}
+      }
+    },
+    "OBX": {
+      "desc": "Observation/Result",
+      "max_fields": 17,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": false},
+        "2": {"name": "Value Type", "type": "ID", "required": false, "max_length": 2},
+        "3": {"name": "Observation Identifier", "type": "CE", "required": true},
+        "5": {"name": "Observation Value", "type": "varies", "required": false},
+        "6": {"name": "Units", "type": "CE", "required": false},
+        "11": {"name": "Observation Result Status", "type": "ID", "required": true, "max_length": 1}
+      }
+    },
+    "ORC": {
+      "desc": "Common Order",
+      "max_fields": 22,
+      "fields": {
+        "1": {"name": "Order Control", "type": "ID", "required": true, "max_length": 2},
+        "2": {"name": "Placer Order Number", "type": "CM", "required": false},
+        "3": {"name": "Filler Order Number", "type": "CM", "required": false},
+        "5": {"name": "Order Status", "type": "ID", "required": false, "max_length": 2}
+      }
+    },
+    "MRG": {
+      "desc": "Merge Patient Information",
+      "max_fields": 4,
+      "fields": {
+        "1": {"name": "Prior Patient ID (Internal)", "type": "CK", "required": true},
+        "2": {"name": "Prior Alternate Patient ID", "type": "CK", "required": false},
+        "3": {"name": "Prior Patient Account Number", "type": "CK", "required": false}
+      }
+    },
+    "QRD": {
+      "desc": "Query Definition",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Query Date/Time", "type": "TS", "required": true},
+        "2": {"name": "Query Format Code", "type": "ID", "required": true, "max_length": 1},
+        "3": {"name": "Query Priority", "type": "ID", "required": true, "max_length": 1},
+        "4": {"name": "Query ID", "type": "ST", "required": true, "max_length": 10}
+      }
+    }
+  }
+}

@@ -1,0 +1,343 @@
+{
+  "version": "2.9",
+  "inherits": null,
+  "segments": {
+    "MSH": {
+      "desc": "Message Header",
+      "max_fields": 21,
+      "fields": {
+        "1":  {"name": "Field Separator", "type": "ST", "required": true, "max_length": 1},
+        "2":  {"name": "Encoding Characters", "type": "ST", "required": true, "max_length": 5},
+        "3":  {"name": "Sending Application", "type": "HD", "required": false},
+        "4":  {"name": "Sending Facility", "type": "HD", "required": false},
+        "5":  {"name": "Receiving Application", "type": "HD", "required": false},
+        "6":  {"name": "Receiving Facility", "type": "HD", "required": false},
+        "7":  {"name": "Date/Time of Message", "type": "DTM", "required": true},
+        "9":  {"name": "Message Type", "type": "MSG", "required": true},
+        "10": {"name": "Message Control ID", "type": "ST", "required": true, "max_length": 199},
+        "11": {"name": "Processing ID", "type": "PT", "required": true},
+        "12": {"name": "Version ID", "type": "VID", "required": true}
+      }
+    },
+    "UAC": {
+      "desc": "User Authentication Credential",
+      "max_fields": 2,
+      "fields": {
+        "1": {"name": "User Authentication Credential Type Code", "type": "CWE", "required": true},
+        "2": {"name": "User Authentication Credential", "type": "ED", "required": true}
+      }
+    },
+    "SFT": {
+      "desc": "Software Segment",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Software Vendor Organization", "type": "XON", "required": true},
+        "3": {"name": "Software Product Name", "type": "ST", "required": true, "max_length": 20},
+        "4": {"name": "Software Binary ID", "type": "ST", "required": true, "max_length": 20}
+      }
+    },
+    "EVN": {
+      "desc": "Event Type",
+      "max_fields": 7,
+      "fields": {
+        "2": {"name": "Recorded Date/Time", "type": "DTM", "required": true},
+        "5": {"name": "Operator ID", "type": "XCN", "required": false, "repeating": true},
+        "6": {"name": "Event Occurred", "type": "DTM", "required": false}
+      }
+    },
+    "PID": {
+      "desc": "Patient Identification",
+      "max_fields": 39,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "3":  {"name": "Patient Identifier List", "type": "CX", "required": true, "repeating": true},
+        "5":  {"name": "Patient Name", "type": "XPN", "required": true, "repeating": true},
+        "7":  {"name": "Date/Time of Birth", "type": "DTM", "required": false},
+        "8":  {"name": "Administrative Sex", "type": "CWE", "required": false}
+      }
+    },
+    "PD1": {
+      "desc": "Additional Demographics",
+      "max_fields": 22,
+      "fields": {
+        "3": {"name": "Patient Primary Facility", "type": "XON", "required": false, "repeating": true}
+      }
+    },
+    "PV1": {
+      "desc": "Patient Visit",
+      "max_fields": 53,
+      "fields": {
+        "2": {"name": "Patient Class", "type": "CWE", "required": true},
+        "44": {"name": "Admit Date/Time", "type": "DTM", "required": false},
+        "45": {"name": "Discharge Date/Time", "type": "DTM", "required": false}
+      }
+    },
+    "PV2": {
+      "desc": "Patient Visit - Additional Info",
+      "max_fields": 53,
+      "fields": {}
+    },
+    "NK1": {
+      "desc": "Next of Kin / Associated Parties",
+      "max_fields": 39,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "3": {"name": "Relationship", "type": "CWE", "required": false}
+      }
+    },
+    "ROL": {
+      "desc": "Role",
+      "max_fields": 12,
+      "fields": {
+        "2": {"name": "Action Code", "type": "ID", "required": true, "max_length": 2},
+        "3": {"name": "Role-ROL", "type": "CWE", "required": true},
+        "4": {"name": "Role Person", "type": "XCN", "required": true, "repeating": true}
+      }
+    },
+    "RF1": {
+      "desc": "Referral Information",
+      "max_fields": 11,
+      "fields": {
+        "6": {"name": "Originating Referral Identifier", "type": "EI", "required": true}
+      }
+    },
+    "PRD": {
+      "desc": "Provider Data",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Provider Role", "type": "CWE", "required": true, "repeating": true}
+      }
+    },
+    "NTE": {
+      "desc": "Notes and Comments",
+      "max_fields": 4,
+      "fields": {
+        "3": {"name": "Comment", "type": "FT", "required": false}
+      }
+    },
+    "MSA": {
+      "desc": "Message Acknowledgment",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Acknowledgment Code", "type": "ID", "required": true, "max_length": 2},
+        "2": {"name": "Message Control ID", "type": "ST", "required": true, "max_length": 199}
+      }
+    },
+    "AL1": {
+      "desc": "Allergy Information",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "3": {"name": "Allergy Code/Mnemonic/Description", "type": "CWE", "required": true}
+      }
+    },
+    "DG1": {
+      "desc": "Diagnosis",
+      "max_fields": 25,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "6": {"name": "Diagnosis Type", "type": "CWE", "required": true}
+      }
+    },
+    "PR1": {
+      "desc": "Procedures",
+      "max_fields": 25,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "3": {"name": "Procedure Code", "type": "CNE", "required": true}
+      }
+    },
+    "OBR": {
+      "desc": "Observation Request",
+      "max_fields": 50,
+      "fields": {
+        "4": {"name": "Universal Service ID", "type": "CWE", "required": true}
+      }
+    },
+    "OBX": {
+      "desc": "Observation/Result",
+      "max_fields": 25,
+      "fields": {
+        "3":  {"name": "Observation Identifier", "type": "CWE", "required": true},
+        "11": {"name": "Observation Result Status", "type": "ID", "required": true, "max_length": 1}
+      }
+    },
+    "ORC": {
+      "desc": "Common Order",
+      "max_fields": 33,
+      "fields": {
+        "1": {"name": "Order Control", "type": "ID", "required": true, "max_length": 2}
+      }
+    },
+    "TQ1": {
+      "desc": "Timing/Quantity",
+      "max_fields": 14,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": false}
+      }
+    },
+    "TQ2": {
+      "desc": "Timing/Quantity Relationship",
+      "max_fields": 10,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": false}
+      }
+    },
+    "SPM": {
+      "desc": "Specimen",
+      "max_fields": 32,
+      "fields": {
+        "4": {"name": "Specimen Type", "type": "CWE", "required": true}
+      }
+    },
+    "IN1": {
+      "desc": "Insurance",
+      "max_fields": 53,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Insurance Plan ID", "type": "CWE", "required": true},
+        "3": {"name": "Insurance Company ID", "type": "CX", "required": true, "repeating": true}
+      }
+    },
+    "GT1": {
+      "desc": "Guarantor",
+      "max_fields": 55,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "3": {"name": "Guarantor Name", "type": "XPN", "required": true}
+      }
+    },
+    "MRG": {
+      "desc": "Merge Patient Information",
+      "max_fields": 7,
+      "fields": {
+        "1": {"name": "Prior Patient Identifier List", "type": "CX", "required": true, "repeating": true}
+      }
+    },
+    "MFI": {
+      "desc": "Master File Identification",
+      "max_fields": 7,
+      "fields": {
+        "1": {"name": "Master File Identifier", "type": "CWE", "required": true}
+      }
+    },
+    "MFE": {
+      "desc": "Master File Entry",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Record-Level Event Code", "type": "ID", "required": true, "max_length": 3},
+        "4": {"name": "Primary Key Value - MFE", "type": "varies", "required": true}
+      }
+    },
+    "STF": {
+      "desc": "Staff Identification",
+      "max_fields": 34,
+      "fields": {
+        "3": {"name": "Staff Name", "type": "XPN", "required": false}
+      }
+    },
+    "RXD": {
+      "desc": "Pharmacy/Treatment Dispense",
+      "max_fields": 30,
+      "fields": {
+        "1": {"name": "Dispense Sub-ID Counter", "type": "NM", "required": true},
+        "2": {"name": "Dispense/Give Code", "type": "CWE", "required": true},
+        "3": {"name": "Date/Time Dispensed", "type": "DTM", "required": true},
+        "4": {"name": "Actual Dispense Amount", "type": "NM", "required": true}
+      }
+    },
+    "RXR": {
+      "desc": "Pharmacy/Treatment Route",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Route", "type": "CWE", "required": true}
+      }
+    },
+    "RXE": {
+      "desc": "Pharmacy/Treatment Encoded Order",
+      "max_fields": 45,
+      "fields": {
+        "2": {"name": "Give Code", "type": "CWE", "required": true},
+        "3": {"name": "Give Amount - Minimum", "type": "NM", "required": true},
+        "5": {"name": "Give Units", "type": "CWE", "required": true}
+      }
+    },
+    "RXO": {
+      "desc": "Pharmacy/Treatment Order",
+      "max_fields": 30,
+      "fields": {
+        "1": {"name": "Requested Give Code", "type": "CWE", "required": false}
+      }
+    },
+    "RXA": {
+      "desc": "Pharmacy/Treatment Administration",
+      "max_fields": 26,
+      "fields": {
+        "1": {"name": "Give Sub-ID Counter", "type": "NM", "required": true},
+        "2": {"name": "Administration Sub-ID Counter", "type": "NM", "required": true},
+        "3": {"name": "Date/Time Start of Administration", "type": "DTM", "required": true},
+        "4": {"name": "Date/Time End of Administration", "type": "DTM", "required": true},
+        "5": {"name": "Administered Code", "type": "CWE", "required": true},
+        "6": {"name": "Administered Amount", "type": "NM", "required": true}
+      }
+    },
+    "SCH": {
+      "desc": "Scheduling Activity Information",
+      "max_fields": 27,
+      "fields": {
+        "6": {"name": "Event Reason", "type": "CWE", "required": true}
+      }
+    },
+    "AIG": {
+      "desc": "Appointment Information - General Resource",
+      "max_fields": 14,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true}
+      }
+    },
+    "AIL": {
+      "desc": "Appointment Information - Location Resource",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true}
+      }
+    },
+    "AIP": {
+      "desc": "Appointment Information - Personnel Resource",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true}
+      }
+    },
+    "AIS": {
+      "desc": "Appointment Information - Service",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "3": {"name": "Universal Service ID", "type": "CWE", "required": true}
+      }
+    },
+    "QAK": {
+      "desc": "Query Acknowledgment",
+      "max_fields": 6,
+      "fields": {
+        "2": {"name": "Query Response Status", "type": "ID", "required": false, "max_length": 4}
+      }
+    },
+    "ERR": {
+      "desc": "Error",
+      "max_fields": 9,
+      "fields": {
+        "3": {"name": "HL7 Error Code", "type": "CWE", "required": true},
+        "4": {"name": "Severity", "type": "ID", "required": true, "max_length": 2}
+      }
+    },
+    "ACC": {
+      "desc": "Accident",
+      "max_fields": 14,
+      "fields": {
+        "1": {"name": "Accident Date/Time", "type": "DTM", "required": false}
+      }
+    }
+  }
+}

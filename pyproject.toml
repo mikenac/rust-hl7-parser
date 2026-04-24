@@ -1,0 +1,45 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "rust-hl7-parser"
+version = "0.1.0"
+requires-python = ">=3.13"
+description = "A fast HL7v2 message parser written in Rust with Python bindings"
+readme = "README.md"
+license = { text = "MIT" }
+keywords = ["hl7", "hl7v2", "parser", "rust", "healthcare", "pyo3"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+orjson = ["orjson>=3.9"]
+dev = [
+    "pytest>=7.0",
+    "maturin>=1.0,<2.0",
+]
+
+[project.urls]
+Repository = "https://github.com/mike-nacey/rust-hl7-parser"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+[tool.maturin]
+features = ["pyo3/extension-module", "pyo3/abi3-py313"]
+python-source = "python"
+module-name = "rust_hl7_parser._native"

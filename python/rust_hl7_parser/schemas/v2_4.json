@@ -1,0 +1,519 @@
+{
+  "version": "2.4",
+  "inherits": null,
+  "segments": {
+    "MSH": {
+      "desc": "Message Header",
+      "max_fields": 21,
+      "fields": {
+        "1":  {"name": "Field Separator", "type": "ST", "required": true, "max_length": 1},
+        "2":  {"name": "Encoding Characters", "type": "ST", "required": true, "max_length": 4},
+        "3":  {"name": "Sending Application", "type": "HD", "required": false},
+        "4":  {"name": "Sending Facility", "type": "HD", "required": false},
+        "5":  {"name": "Receiving Application", "type": "HD", "required": false},
+        "6":  {"name": "Receiving Facility", "type": "HD", "required": false},
+        "7":  {"name": "Date/Time of Message", "type": "TS", "required": true},
+        "8":  {"name": "Security", "type": "ST", "required": false, "max_length": 40},
+        "9":  {"name": "Message Type", "type": "MSG", "required": true},
+        "10": {"name": "Message Control ID", "type": "ST", "required": true, "max_length": 20},
+        "11": {"name": "Processing ID", "type": "PT", "required": true},
+        "12": {"name": "Version ID", "type": "VID", "required": true},
+        "13": {"name": "Sequence Number", "type": "NM", "required": false},
+        "14": {"name": "Continuation Pointer", "type": "ST", "required": false, "max_length": 180},
+        "15": {"name": "Accept Acknowledgment Type", "type": "ID", "required": false, "max_length": 2},
+        "16": {"name": "Application Acknowledgment Type", "type": "ID", "required": false, "max_length": 2},
+        "17": {"name": "Country Code", "type": "ID", "required": false, "max_length": 3},
+        "18": {"name": "Character Set", "type": "ID", "required": false, "max_length": 16},
+        "19": {"name": "Principal Language of Message", "type": "CE", "required": false},
+        "20": {"name": "Alternate Character Set Handling Scheme", "type": "ID", "required": false, "max_length": 20},
+        "21": {"name": "Conformance Statement ID", "type": "EI", "required": false}
+      }
+    },
+    "EVN": {
+      "desc": "Event Type",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Event Type Code", "type": "ID", "required": false, "max_length": 3},
+        "2": {"name": "Recorded Date/Time", "type": "TS", "required": true},
+        "3": {"name": "Date/Time Planned Event", "type": "TS", "required": false},
+        "4": {"name": "Event Reason Code", "type": "IS", "required": false, "max_length": 3},
+        "5": {"name": "Operator ID", "type": "XCN", "required": false, "repeating": true},
+        "6": {"name": "Event Occurred", "type": "TS", "required": false}
+      }
+    },
+    "PID": {
+      "desc": "Patient Identification",
+      "max_fields": 39,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Patient ID", "type": "CX", "required": false},
+        "3":  {"name": "Patient Identifier List", "type": "CX", "required": true, "repeating": true},
+        "4":  {"name": "Alternate Patient ID", "type": "CX", "required": false},
+        "5":  {"name": "Patient Name", "type": "XPN", "required": true, "repeating": true},
+        "6":  {"name": "Mother's Maiden Name", "type": "XPN", "required": false},
+        "7":  {"name": "Date/Time of Birth", "type": "TS", "required": false},
+        "8":  {"name": "Administrative Sex", "type": "IS", "required": false, "max_length": 1},
+        "9":  {"name": "Patient Alias", "type": "XPN", "required": false},
+        "10": {"name": "Race", "type": "CE", "required": false},
+        "11": {"name": "Patient Address", "type": "XAD", "required": false, "repeating": true},
+        "13": {"name": "Phone Number - Home", "type": "XTN", "required": false, "repeating": true},
+        "14": {"name": "Phone Number - Business", "type": "XTN", "required": false, "repeating": true},
+        "15": {"name": "Primary Language", "type": "CE", "required": false},
+        "16": {"name": "Marital Status", "type": "CE", "required": false},
+        "17": {"name": "Religion", "type": "CE", "required": false},
+        "18": {"name": "Patient Account Number", "type": "CX", "required": false},
+        "19": {"name": "SSN Number - Patient", "type": "ST", "required": false, "max_length": 16},
+        "22": {"name": "Ethnic Group", "type": "CE", "required": false},
+        "23": {"name": "Birth Place", "type": "ST", "required": false, "max_length": 60},
+        "24": {"name": "Multiple Birth Indicator", "type": "ID", "required": false, "max_length": 1},
+        "25": {"name": "Birth Order", "type": "NM", "required": false},
+        "26": {"name": "Citizenship", "type": "CE", "required": false},
+        "28": {"name": "Nationality", "type": "CE", "required": false},
+        "29": {"name": "Patient Death Date and Time", "type": "TS", "required": false},
+        "30": {"name": "Patient Death Indicator", "type": "ID", "required": false, "max_length": 1},
+        "31": {"name": "Identity Unknown Indicator", "type": "ID", "required": false, "max_length": 1},
+        "32": {"name": "Identity Reliability Code", "type": "IS", "required": false},
+        "33": {"name": "Last Update Date/Time", "type": "TS", "required": false},
+        "34": {"name": "Last Update Facility", "type": "HD", "required": false},
+        "35": {"name": "Species Code", "type": "CE", "required": false},
+        "36": {"name": "Breed Code", "type": "CE", "required": false},
+        "37": {"name": "Strain", "type": "ST", "required": false},
+        "38": {"name": "Production Class Code", "type": "CE", "required": false}
+      }
+    },
+    "PD1": {
+      "desc": "Additional Demographics",
+      "max_fields": 20,
+      "fields": {
+        "1": {"name": "Living Dependency", "type": "IS", "required": false},
+        "2": {"name": "Living Arrangement", "type": "IS", "required": false},
+        "3": {"name": "Patient Primary Facility", "type": "XON", "required": false, "repeating": true},
+        "4": {"name": "Patient Primary Care Provider Name and ID", "type": "XCN", "required": false},
+        "5": {"name": "Student Indicator", "type": "IS", "required": false},
+        "6": {"name": "Handicap", "type": "IS", "required": false},
+        "7": {"name": "Living Will Code", "type": "IS", "required": false},
+        "8": {"name": "Organ Donor Code", "type": "IS", "required": false},
+        "9": {"name": "Separate Bill", "type": "ID", "required": false, "max_length": 1},
+        "10": {"name": "Duplicate Patient", "type": "CX", "required": false},
+        "11": {"name": "Publicity Code", "type": "CE", "required": false},
+        "12": {"name": "Protection Indicator", "type": "ID", "required": false, "max_length": 1}
+      }
+    },
+    "PV1": {
+      "desc": "Patient Visit",
+      "max_fields": 51,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Patient Class", "type": "IS", "required": true, "max_length": 1},
+        "3":  {"name": "Assigned Patient Location", "type": "PL", "required": false},
+        "4":  {"name": "Admission Type", "type": "IS", "required": false, "max_length": 2},
+        "5":  {"name": "Preadmit Number", "type": "CX", "required": false},
+        "6":  {"name": "Prior Patient Location", "type": "PL", "required": false},
+        "7":  {"name": "Attending Doctor", "type": "XCN", "required": false, "repeating": true},
+        "8":  {"name": "Referring Doctor", "type": "XCN", "required": false, "repeating": true},
+        "9":  {"name": "Consulting Doctor", "type": "XCN", "required": false, "repeating": true},
+        "10": {"name": "Hospital Service", "type": "IS", "required": false, "max_length": 3},
+        "11": {"name": "Temporary Location", "type": "PL", "required": false},
+        "14": {"name": "Admit Source", "type": "IS", "required": false, "max_length": 3},
+        "17": {"name": "Admitting Doctor", "type": "XCN", "required": false, "repeating": true},
+        "18": {"name": "Patient Type", "type": "IS", "required": false, "max_length": 2},
+        "19": {"name": "Visit Number", "type": "CX", "required": false},
+        "36": {"name": "Discharge Disposition", "type": "IS", "required": false, "max_length": 3},
+        "44": {"name": "Admit Date/Time", "type": "TS", "required": false},
+        "45": {"name": "Discharge Date/Time", "type": "TS", "required": false},
+        "50": {"name": "Alt Visit ID", "type": "CX", "required": false},
+        "51": {"name": "Visit Indicator", "type": "IS", "required": false, "max_length": 1}
+      }
+    },
+    "PV2": {
+      "desc": "Patient Visit - Additional Info",
+      "max_fields": 49,
+      "fields": {
+        "1":  {"name": "Prior Pending Location", "type": "PL", "required": false},
+        "3":  {"name": "Admit Reason", "type": "CE", "required": false},
+        "8":  {"name": "Expected Admit Date/Time", "type": "TS", "required": false},
+        "9":  {"name": "Expected Discharge Date/Time", "type": "TS", "required": false},
+        "22": {"name": "Visit Protection Indicator", "type": "ID", "required": false, "max_length": 1},
+        "43": {"name": "Expected Surgery Date/Time", "type": "TS", "required": false},
+        "45": {"name": "Ambulatory Status", "type": "IS", "required": false},
+        "47": {"name": "Expected LOA Return Date/Time", "type": "TS", "required": false}
+      }
+    },
+    "NK1": {
+      "desc": "Next of Kin / Associated Parties",
+      "max_fields": 39,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": true},
+        "2":  {"name": "Name", "type": "XPN", "required": false, "repeating": true},
+        "3":  {"name": "Relationship", "type": "CE", "required": false},
+        "4":  {"name": "Address", "type": "XAD", "required": false, "repeating": true},
+        "5":  {"name": "Phone Number", "type": "XTN", "required": false, "repeating": true},
+        "6":  {"name": "Business Phone Number", "type": "XTN", "required": false, "repeating": true},
+        "7":  {"name": "Contact Role", "type": "CE", "required": false},
+        "15": {"name": "Administrative Sex", "type": "IS", "required": false, "max_length": 1},
+        "16": {"name": "Date/Time of Birth", "type": "TS", "required": false}
+      }
+    },
+    "ROL": {
+      "desc": "Role",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Role Instance ID", "type": "EI", "required": false},
+        "2": {"name": "Action Code", "type": "ID", "required": true, "max_length": 2},
+        "3": {"name": "Role-ROL", "type": "CE", "required": true},
+        "4": {"name": "Role Person", "type": "XCN", "required": true, "repeating": true},
+        "5": {"name": "Role Begin Date/Time", "type": "TS", "required": false},
+        "6": {"name": "Role End Date/Time", "type": "TS", "required": false},
+        "11": {"name": "Office/Home Address", "type": "XAD", "required": false}
+      }
+    },
+    "RF1": {
+      "desc": "Referral Information",
+      "max_fields": 11,
+      "fields": {
+        "1": {"name": "Referral Status", "type": "CE", "required": false},
+        "2": {"name": "Referral Priority", "type": "CE", "required": false},
+        "3": {"name": "Referral Type", "type": "CE", "required": false},
+        "4": {"name": "Referral Disposition", "type": "CE", "required": false},
+        "5": {"name": "Referral Category", "type": "CE", "required": false},
+        "6": {"name": "Originating Referral Identifier", "type": "EI", "required": true},
+        "7": {"name": "Effective Date", "type": "TS", "required": false},
+        "8": {"name": "Expiration Date", "type": "TS", "required": false},
+        "9": {"name": "Process Date", "type": "TS", "required": false},
+        "10": {"name": "Referral Reason", "type": "CE", "required": false},
+        "11": {"name": "External Referral Identifier", "type": "EI", "required": false}
+      }
+    },
+    "PRD": {
+      "desc": "Provider Data",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Provider Role", "type": "CE", "required": true, "repeating": true},
+        "2": {"name": "Provider Name", "type": "XPN", "required": false, "repeating": true},
+        "3": {"name": "Provider Address", "type": "XAD", "required": false, "repeating": true},
+        "4": {"name": "Provider Location", "type": "PL", "required": false},
+        "5": {"name": "Provider Communication Information", "type": "XTN", "required": false},
+        "7": {"name": "Provider Identifiers", "type": "PI", "required": false}
+      }
+    },
+    "NTE": {
+      "desc": "Notes and Comments",
+      "max_fields": 4,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": false},
+        "2": {"name": "Source of Comment", "type": "ID", "required": false, "max_length": 8},
+        "3": {"name": "Comment", "type": "FT", "required": false},
+        "4": {"name": "Comment Type", "type": "CE", "required": false}
+      }
+    },
+    "MSA": {
+      "desc": "Message Acknowledgment",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Acknowledgment Code", "type": "ID", "required": true, "max_length": 2},
+        "2": {"name": "Message Control ID", "type": "ST", "required": true, "max_length": 20},
+        "3": {"name": "Text Message", "type": "ST", "required": false, "max_length": 80},
+        "4": {"name": "Expected Sequence Number", "type": "NM", "required": false},
+        "5": {"name": "Delayed Acknowledgment Type", "type": "ID", "required": false, "max_length": 1},
+        "6": {"name": "Error Condition", "type": "CE", "required": false}
+      }
+    },
+    "AL1": {
+      "desc": "Allergy Information",
+      "max_fields": 6,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Allergy Type", "type": "IS", "required": false, "max_length": 2},
+        "3": {"name": "Allergy Code/Mnemonic/Description", "type": "CE", "required": true},
+        "4": {"name": "Allergy Severity Code", "type": "CE", "required": false},
+        "5": {"name": "Allergy Reaction Code", "type": "ST", "required": false, "max_length": 15, "repeating": true},
+        "6": {"name": "Identification Date", "type": "DT", "required": false}
+      }
+    },
+    "DG1": {
+      "desc": "Diagnosis",
+      "max_fields": 21,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Diagnosis Coding Method", "type": "ID", "required": false, "max_length": 2},
+        "3": {"name": "Diagnosis Code", "type": "CE", "required": false},
+        "4": {"name": "Diagnosis Description", "type": "ST", "required": false, "max_length": 40},
+        "5": {"name": "Diagnosis Date/Time", "type": "TS", "required": false},
+        "6": {"name": "Diagnosis Type", "type": "IS", "required": true, "max_length": 2}
+      }
+    },
+    "PR1": {
+      "desc": "Procedures",
+      "max_fields": 20,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Procedure Coding Method", "type": "IS", "required": false, "max_length": 3},
+        "3": {"name": "Procedure Code", "type": "CE", "required": true},
+        "4": {"name": "Procedure Description", "type": "ST", "required": false, "max_length": 40},
+        "5": {"name": "Procedure Date/Time", "type": "TS", "required": false},
+        "6": {"name": "Procedure Functional Type", "type": "IS", "required": false, "max_length": 2}
+      }
+    },
+    "OBR": {
+      "desc": "Observation Request",
+      "max_fields": 45,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Placer Order Number", "type": "EI", "required": false},
+        "3":  {"name": "Filler Order Number", "type": "EI", "required": false},
+        "4":  {"name": "Universal Service ID", "type": "CE", "required": true},
+        "7":  {"name": "Observation Date/Time", "type": "TS", "required": false},
+        "14": {"name": "Specimen Received Date/Time", "type": "TS", "required": false},
+        "22": {"name": "Results Report/Status Change Date/Time", "type": "TS", "required": false},
+        "25": {"name": "Result Status", "type": "ID", "required": false, "max_length": 1}
+      }
+    },
+    "OBX": {
+      "desc": "Observation/Result",
+      "max_fields": 18,
+      "fields": {
+        "1":  {"name": "Set ID", "type": "SI", "required": false},
+        "2":  {"name": "Value Type", "type": "ID", "required": false, "max_length": 3},
+        "3":  {"name": "Observation Identifier", "type": "CE", "required": true},
+        "4":  {"name": "Observation Sub-ID", "type": "ST", "required": false, "max_length": 20},
+        "5":  {"name": "Observation Value", "type": "varies", "required": false},
+        "6":  {"name": "Units", "type": "CE", "required": false},
+        "7":  {"name": "References Range", "type": "ST", "required": false, "max_length": 60},
+        "11": {"name": "Observation Result Status", "type": "ID", "required": true, "max_length": 1},
+        "14": {"name": "Date/Time of the Observation", "type": "TS", "required": false}
+      }
+    },
+    "ORC": {
+      "desc": "Common Order",
+      "max_fields": 26,
+      "fields": {
+        "1":  {"name": "Order Control", "type": "ID", "required": true, "max_length": 2},
+        "2":  {"name": "Placer Order Number", "type": "EI", "required": false},
+        "3":  {"name": "Filler Order Number", "type": "EI", "required": false},
+        "5":  {"name": "Order Status", "type": "ID", "required": false, "max_length": 2},
+        "9":  {"name": "Date/Time of Transaction", "type": "TS", "required": false},
+        "10": {"name": "Entered By", "type": "XCN", "required": false},
+        "12": {"name": "Ordering Provider", "type": "XCN", "required": false}
+      }
+    },
+    "IN1": {
+      "desc": "Insurance",
+      "max_fields": 49,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Insurance Plan ID", "type": "CE", "required": true},
+        "3": {"name": "Insurance Company ID", "type": "CX", "required": true, "repeating": true}
+      }
+    },
+    "IN2": {
+      "desc": "Insurance Additional Info",
+      "max_fields": 72,
+      "fields": {
+        "1": {"name": "Insured's Employee ID", "type": "CX", "required": false},
+        "2": {"name": "Insured's Social Security Number", "type": "ST", "required": false, "max_length": 11}
+      }
+    },
+    "GT1": {
+      "desc": "Guarantor",
+      "max_fields": 55,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Guarantor Number", "type": "CX", "required": false},
+        "3": {"name": "Guarantor Name", "type": "XPN", "required": true}
+      }
+    },
+    "ACC": {
+      "desc": "Accident",
+      "max_fields": 11,
+      "fields": {
+        "1": {"name": "Accident Date/Time", "type": "TS", "required": false},
+        "2": {"name": "Accident Code", "type": "CE", "required": false},
+        "3": {"name": "Accident Location", "type": "ST", "required": false, "max_length": 25}
+      }
+    },
+    "SCH": {
+      "desc": "Scheduling Activity Information",
+      "max_fields": 26,
+      "fields": {
+        "1": {"name": "Placer Appointment ID", "type": "EI", "required": false},
+        "2": {"name": "Filler Appointment ID", "type": "EI", "required": false},
+        "5": {"name": "Schedule ID", "type": "CE", "required": false},
+        "6": {"name": "Event Reason", "type": "CE", "required": true},
+        "11": {"name": "Appointment Duration", "type": "NM", "required": false},
+        "16": {"name": "Filler Contact Person", "type": "XCN", "required": false}
+      }
+    },
+    "AIG": {
+      "desc": "Appointment Information - General Resource",
+      "max_fields": 14,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Segment Action Code", "type": "ID", "required": false, "max_length": 3},
+        "3": {"name": "Resource ID", "type": "CWE", "required": false},
+        "4": {"name": "Resource Type", "type": "CWE", "required": true}
+      }
+    },
+    "AIL": {
+      "desc": "Appointment Information - Location Resource",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Segment Action Code", "type": "ID", "required": false, "max_length": 3},
+        "3": {"name": "Location Resource ID", "type": "PL", "required": false},
+        "4": {"name": "Location Type-AIL", "type": "CE", "required": false}
+      }
+    },
+    "AIP": {
+      "desc": "Appointment Information - Personnel Resource",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Segment Action Code", "type": "ID", "required": false, "max_length": 3},
+        "3": {"name": "Personnel Resource ID", "type": "XCN", "required": false},
+        "4": {"name": "Resource Type", "type": "CE", "required": false}
+      }
+    },
+    "AIS": {
+      "desc": "Appointment Information - Service",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": true},
+        "2": {"name": "Segment Action Code", "type": "ID", "required": false, "max_length": 3},
+        "3": {"name": "Universal Service ID", "type": "CE", "required": true}
+      }
+    },
+    "MFI": {
+      "desc": "Master File Identification",
+      "max_fields": 7,
+      "fields": {
+        "1": {"name": "Master File Identifier", "type": "CE", "required": true},
+        "3": {"name": "File-Level Event Code", "type": "ID", "required": true, "max_length": 3},
+        "6": {"name": "Response Level Code", "type": "ID", "required": true, "max_length": 2}
+      }
+    },
+    "MFE": {
+      "desc": "Master File Entry",
+      "max_fields": 5,
+      "fields": {
+        "1": {"name": "Record-Level Event Code", "type": "ID", "required": true, "max_length": 3},
+        "3": {"name": "Effective Date/Time", "type": "TS", "required": false},
+        "4": {"name": "Primary Key Value - MFE", "type": "varies", "required": true}
+      }
+    },
+    "STF": {
+      "desc": "Staff Identification",
+      "max_fields": 28,
+      "fields": {
+        "1": {"name": "Primary Key Value - STF", "type": "CE", "required": false},
+        "2": {"name": "Staff ID Code", "type": "CX", "required": false},
+        "3": {"name": "Staff Name", "type": "XPN", "required": false},
+        "4": {"name": "Staff Type", "type": "IS", "required": false},
+        "5": {"name": "Administrative Sex", "type": "IS", "required": false, "max_length": 1}
+      }
+    },
+    "MRG": {
+      "desc": "Merge Patient Information",
+      "max_fields": 7,
+      "fields": {
+        "1": {"name": "Prior Patient Identifier List", "type": "CX", "required": true, "repeating": true},
+        "2": {"name": "Prior Alternate Patient ID", "type": "CX", "required": false},
+        "3": {"name": "Prior Patient Account Number", "type": "CX", "required": false},
+        "4": {"name": "Prior Patient ID", "type": "CX", "required": false},
+        "5": {"name": "Prior Visit Number", "type": "CX", "required": false},
+        "6": {"name": "Prior Alternate Visit ID", "type": "CX", "required": false},
+        "7": {"name": "Prior Patient Name", "type": "XPN", "required": false}
+      }
+    },
+    "RXD": {
+      "desc": "Pharmacy/Treatment Dispense",
+      "max_fields": 30,
+      "fields": {
+        "1": {"name": "Dispense Sub-ID Counter", "type": "NM", "required": true},
+        "2": {"name": "Dispense/Give Code", "type": "CE", "required": true},
+        "3": {"name": "Date/Time Dispensed", "type": "TS", "required": true},
+        "4": {"name": "Actual Dispense Amount", "type": "NM", "required": true},
+        "5": {"name": "Actual Dispense Units", "type": "CE", "required": false},
+        "6": {"name": "Actual Dosage Form", "type": "CE", "required": false}
+      }
+    },
+    "RXR": {
+      "desc": "Pharmacy/Treatment Route",
+      "max_fields": 5,
+      "fields": {
+        "1": {"name": "Route", "type": "CE", "required": true},
+        "2": {"name": "Administration Site", "type": "CE", "required": false},
+        "3": {"name": "Administration Device", "type": "CE", "required": false},
+        "4": {"name": "Administration Method", "type": "CE", "required": false},
+        "5": {"name": "Routing Instruction", "type": "CE", "required": false}
+      }
+    },
+    "RXE": {
+      "desc": "Pharmacy/Treatment Encoded Order",
+      "max_fields": 43,
+      "fields": {
+        "2": {"name": "Give Code", "type": "CE", "required": true},
+        "3": {"name": "Give Amount - Minimum", "type": "NM", "required": true},
+        "5": {"name": "Give Units", "type": "CE", "required": true},
+        "6": {"name": "Give Dosage Form", "type": "CE", "required": false}
+      }
+    },
+    "RXO": {
+      "desc": "Pharmacy/Treatment Order",
+      "max_fields": 25,
+      "fields": {
+        "1": {"name": "Requested Give Code", "type": "CE", "required": false},
+        "2": {"name": "Requested Give Amount - Minimum", "type": "NM", "required": false},
+        "4": {"name": "Requested Give Units", "type": "CE", "required": false}
+      }
+    },
+    "RXA": {
+      "desc": "Pharmacy/Treatment Administration",
+      "max_fields": 22,
+      "fields": {
+        "1": {"name": "Give Sub-ID Counter", "type": "NM", "required": true},
+        "2": {"name": "Administration Sub-ID Counter", "type": "NM", "required": true},
+        "3": {"name": "Date/Time Start of Administration", "type": "TS", "required": true},
+        "4": {"name": "Date/Time End of Administration", "type": "TS", "required": true},
+        "5": {"name": "Administered Code", "type": "CE", "required": true},
+        "6": {"name": "Administered Amount", "type": "NM", "required": true},
+        "7": {"name": "Administered Units", "type": "CE", "required": false}
+      }
+    },
+    "SPM": {
+      "desc": "Specimen",
+      "max_fields": 31,
+      "fields": {
+        "1": {"name": "Set ID", "type": "SI", "required": false},
+        "2": {"name": "Specimen ID", "type": "EIP", "required": false},
+        "4": {"name": "Specimen Type", "type": "CWE", "required": true}
+      }
+    },
+    "QRD": {
+      "desc": "Query Definition",
+      "max_fields": 12,
+      "fields": {
+        "1": {"name": "Query Date/Time", "type": "TS", "required": true},
+        "2": {"name": "Query Format Code", "type": "ID", "required": true, "max_length": 1},
+        "3": {"name": "Query Priority", "type": "ID", "required": true, "max_length": 1},
+        "4": {"name": "Query ID", "type": "ST", "required": true, "max_length": 10}
+      }
+    },
+    "QAK": {
+      "desc": "Query Acknowledgment",
+      "max_fields": 4,
+      "fields": {
+        "1": {"name": "Query Tag", "type": "ST", "required": false, "max_length": 32},
+        "2": {"name": "Query Response Status", "type": "ID", "required": false, "max_length": 4}
+      }
+    },
+    "ERR": {
+      "desc": "Error",
+      "max_fields": 3,
+      "fields": {
+        "1": {"name": "Error Code and Location", "type": "CM", "required": true},
+        "2": {"name": "Error Location", "type": "ERL", "required": false},
+        "3": {"name": "HL7 Error Code", "type": "CWE", "required": false}
+      }
+    }
+  }
+}

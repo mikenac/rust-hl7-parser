@@ -1,0 +1,11 @@
+{
+  "version": "2.8.2",
+  "inherits": "2.8.1",
+  "segments": {
+    "MSH": {
+      "desc": "Message Header",
+      "max_fields": 21,
+      "fields": {}
+    }
+  }
+}

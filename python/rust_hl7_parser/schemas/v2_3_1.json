@@ -1,0 +1,33 @@
+{
+  "version": "2.3.1",
+  "inherits": "2.3",
+  "segments": {
+    "MSH": {
+      "desc": "Message Header",
+      "max_fields": 20,
+      "fields": {}
+    },
+    "PID": {
+      "desc": "Patient Identification",
+      "max_fields": 39,
+      "fields": {
+        "23": {"name": "Birth Place", "type": "ST", "required": false, "max_length": 60},
+        "24": {"name": "Multiple Birth Indicator", "type": "ID", "required": false, "max_length": 2},
+        "25": {"name": "Birth Order", "type": "NM", "required": false},
+        "26": {"name": "Citizenship", "type": "CE", "required": false},
+        "27": {"name": "Veterans Military Status", "type": "CE", "required": false},
+        "28": {"name": "Nationality", "type": "CE", "required": false},
+        "38": {"name": "Last Update Date/Time", "type": "TS", "required": false},
+        "39": {"name": "Last Update Facility", "type": "HD", "required": false}
+      }
+    },
+    "PV1": {
+      "desc": "Patient Visit",
+      "max_fields": 52,
+      "fields": {
+        "51": {"name": "Visit Indicator", "type": "IS", "required": false, "max_length": 1},
+        "52": {"name": "Other Healthcare Provider", "type": "XCN", "required": false}
+      }
+    }
+  }
+}

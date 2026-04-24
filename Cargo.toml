@@ -1,0 +1,18 @@
+[package]
+name = "rust-hl7-parser"
+version = "0.1.0"
+edition = "2024"
+description = "A fast HL7v2 parser written in Rust with Python bindings"
+license = "MIT"
+
+[lib]
+name = "rust_hl7_parser"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+pyo3 = { version = "0.28", features = ["extension-module", "abi3-py313"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+# No extra dev deps needed; Rust tests live in the source files.

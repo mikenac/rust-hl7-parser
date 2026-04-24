@@ -1,0 +1,14 @@
+{
+  "version": "2.8.1",
+  "inherits": "2.8",
+  "segments": {
+    "PV2": {
+      "desc": "Patient Visit - Additional Info",
+      "max_fields": 53,
+      "fields": {
+        "52": {"name": "Patient Status Effective Date", "type": "DT", "required": false},
+        "53": {"name": "Expected LOA Return Date/Time", "type": "DTM", "required": false}
+      }
+    }
+  }
+}
