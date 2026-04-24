@@ -17,18 +17,12 @@ Usage::
 from __future__ import annotations
 
 import copy
-import json as _json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-try:
-    import orjson as _orjson
-    _ORJSON_AVAILABLE = True
-except ImportError:
-    _orjson = None  # type: ignore[assignment]
-    _ORJSON_AVAILABLE = False
+import orjson
 
 # ---------------------------------------------------------------------------
 # Schema loading helpers
@@ -66,9 +60,7 @@ _KNOWN_VERSIONS_ORDERED: list[str] = [
 def _load_json(name: str) -> dict[str, Any]:
     """Load a JSON schema file by stem name."""
     path = _SCHEMA_DIR / f"{name}.json"
-    if _ORJSON_AVAILABLE:
-        return _orjson.loads(path.read_bytes())  # type: ignore[union-attr]
-    return _json.loads(path.read_bytes())
+    return orjson.loads(path.read_bytes())
 
 
 def _merge_schemas(parent: dict[str, Any], delta: dict[str, Any]) -> dict[str, Any]:

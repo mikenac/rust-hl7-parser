@@ -42,12 +42,31 @@ parse_to_json(message, strict=True) -> bytes
     Parse an HL7v2 message and return orjson-encoded bytes.
     Faster than parse_json() for downstream serialisation because orjson
     avoids intermediate Python string allocation.
-    Requires the orjson extra: pip install rust-hl7-parser[orjson]
 
 parse_file_to_json(path, strict=True) -> bytes
     Parse an HL7v2 file and return orjson-encoded bytes.
     Combines the Rust file-parsing path with orjson serialisation.
-    Requires the orjson extra: pip install rust-hl7-parser[orjson]
+
+get(msg, path, *, default=None, rep=None)
+    Access a field by HL7 path notation, e.g. get(msg, "PID-5.1").
+
+segments(msg, name) -> list[dict]
+    Return all segment dicts with the given segment name.
+
+field(segment, field_num, component=None, *, subcomponent=None, rep=None)
+    Low-level field access on a segment dict (1-based numbering).
+
+all_values(msg, path) -> list
+    Collect a field value from every occurrence of the named segment.
+
+first(msg, name) -> dict | None
+    Return the first segment with the given name, or None.
+
+parse_annotated(message, *, strict=True, version=None) -> dict
+    Parse an HL7v2 message and return an annotated dict with HL7 field names.
+
+parse_annotated_json(message, *, strict=True, version=None) -> str
+    Parse an HL7v2 message and return annotated JSON with HL7 field names.
 
 All functions accept an optional ``strict`` keyword argument (default
 ``True``).  When ``strict=False`` the parser operates in lenient mode:
@@ -72,20 +91,12 @@ segment dicts, each with ``"name"`` and ``"fields"`` keys.
 
 from __future__ import annotations
 
-try:
-    import orjson as _orjson
-    _ORJSON_AVAILABLE = True
-except ImportError:
-    _orjson = None  # type: ignore[assignment]
-    _ORJSON_AVAILABLE = False
+import orjson
 
 from rust_hl7_parser._native import parse, parse_json, parse_file, parse_file_json, parse_batch  # type: ignore[import]
 from rust_hl7_parser.validator import validate, validate_file, validate_file_summary
-
-_ORJSON_INSTALL_HINT = (
-    "The orjson extra is required for this function. "
-    "Install it with: pip install rust-hl7-parser[orjson]"
-)
+from rust_hl7_parser.accessor import get, segments, field, all_values, first
+from rust_hl7_parser.annotator import parse_annotated, parse_annotated_json
 
 
 def parse_to_json(message: str, *, strict: bool = True) -> bytes:
@@ -107,15 +118,8 @@ def parse_to_json(message: str, *, strict: bool = True) -> bytes:
     -------
     bytes
         UTF-8-encoded JSON bytes.
-
-    Raises
-    ------
-    ImportError
-        If the ``orjson`` extra is not installed.
     """
-    if not _ORJSON_AVAILABLE:
-        raise ImportError(_ORJSON_INSTALL_HINT)
-    return _orjson.dumps(parse(message, strict=strict))  # type: ignore[union-attr]
+    return orjson.dumps(parse(message, strict=strict))
 
 
 def parse_file_to_json(path: str, *, strict: bool = True) -> bytes:
@@ -136,15 +140,8 @@ def parse_file_to_json(path: str, *, strict: bool = True) -> bytes:
     -------
     bytes
         UTF-8-encoded JSON bytes (a JSON array of message objects).
-
-    Raises
-    ------
-    ImportError
-        If the ``orjson`` extra is not installed.
     """
-    if not _ORJSON_AVAILABLE:
-        raise ImportError(_ORJSON_INSTALL_HINT)
-    return _orjson.dumps(parse_file(path, strict=strict))  # type: ignore[union-attr]
+    return orjson.dumps(parse_file(path, strict=strict))
 
 
 __all__ = [
@@ -158,5 +155,12 @@ __all__ = [
     "validate",
     "validate_file",
     "validate_file_summary",
+    "get",
+    "segments",
+    "field",
+    "all_values",
+    "first",
+    "parse_annotated",
+    "parse_annotated_json",
 ]
 __version__ = "0.1.0"

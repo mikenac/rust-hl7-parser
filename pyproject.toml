@@ -22,10 +22,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
     "Typing :: Typed",
 ]
-dependencies = []
+dependencies = ["orjson>=3.9"]
 
 [project.optional-dependencies]
-orjson = ["orjson>=3.9"]
 dev = [
     "pytest>=7.0",
     "maturin>=1.0,<2.0",
