@@ -132,6 +132,182 @@ print(f"Issue breakdown: {summary['issue_counts']}")
 # Issue breakdown: {'EXCESS_FIELDS': 12, 'MISSING_REQUIRED_FIELD': 3}
 ```
 
+## Output structure
+
+Both `parse()` and `parse_json()` return the same structure. Fields are
+**automatically collapsed** so simple values surface as plain strings, while
+complex structures remain as nested lists.
+
+### Collapsing rules
+
+The parser applies these rules innermost-first:
+
+| HL7 structure | Single item | Multiple items |
+|---------------|-------------|----------------|
+| Sub-components (`&`) | `"value"` | `["a", "b"]` |
+| Components (`^`) | collapsed sub-component | `["Doe", "John", "M"]` |
+| Repetitions (`~`) | collapsed component | `["val1", "val2"]` |
+| Field | collapsed repetition | list of repetitions |
+
+### Example: ADT^A01 with components and sub-components
+
+**Input:**
+```
+MSH|^~\&|SendingApp|SendingFac|RecvApp|RecvFac|20230101120000||ADT^A01|MSG00001|P|2.3
+PID|1||12345^^^MRN||Doe^John^M||19800101|M
+PV1|1|I|ICU^Bed1^Main
+```
+
+**Output (formatted JSON):**
+```json
+{
+  "segments": [
+    {
+      "name": "MSH",
+      "fields": [
+        "|",
+        "^~\\&",
+        "SendingApp",
+        "SendingFac",
+        "RecvApp",
+        "RecvFac",
+        "20230101120000",
+        "",
+        ["ADT", "A01"],
+        "MSG00001",
+        "P",
+        "2.3"
+      ]
+    },
+    {
+      "name": "PID",
+      "fields": [
+        "1",
+        "",
+        ["12345", "", "", "MRN"],
+        "",
+        ["Doe", "John", "M"],
+        "",
+        "19800101",
+        "M"
+      ]
+    },
+    {
+      "name": "PV1",
+      "fields": [
+        "1",
+        "I",
+        ["ICU", "Bed1", "Main"]
+      ]
+    }
+  ]
+}
+```
+
+Key observations:
+- **Simple fields** like `"SendingApp"` → plain string
+- **Components** like `ADT^A01` → `["ADT", "A01"]`
+- **Sub-components** like `12345^^^MRN` → `["12345", "", "", "MRN"]` (empty strings preserved)
+- **MSH-1** is always `"|"`, **MSH-2** is always `"^~\\&"` (stored as literal strings, not parsed)
+
+### Example: repeating fields (`~` separator)
+
+**Input:**
+```
+MSH|^~\&|App|Fac||||ADT^A01|1|P|2.3
+NK1|1|Smith^Jane~Jones^Bob|SPO~EMC|123 Main St~456 Oak Ave
+```
+
+**Output:**
+```json
+{
+  "segments": [
+    { "name": "MSH", "fields": ["...(abbreviated)"] },
+    {
+      "name": "NK1",
+      "fields": [
+        "1",
+        [["Smith", "Jane"], ["Jones", "Bob"]],
+        ["SPO", "EMC"],
+        ["123 Main St", "456 Oak Ave"]
+      ]
+    }
+  ]
+}
+```
+
+NK1-2 has **repeating composite fields**: two repetitions of `name^name`, so it
+becomes a list of lists: `[["Smith", "Jane"], ["Jones", "Bob"]]`.
+
+NK1-3 has **repeating simple fields**: `SPO~EMC` → `["SPO", "EMC"]`.
+
+Note: a repeating simple field and a multi-component field both produce a flat list
+of strings — the parser collapses them identically because the underlying HL7
+structure is the same (single sub-component per component).
+
+### Example: repeating segments (multiple OBX)
+
+Repeating segments like OBX, NK1, DG1, or AL1 appear as **separate entries** in the
+`segments` list — they are not grouped or merged:
+
+**Input:**
+```
+MSH|^~\&|Lab|Fac||||ORU^R01|1|P|2.3
+PID|1||12345
+OBR|1|||CBC
+OBX|1|NM|WBC||7.2|10*3/uL
+OBX|2|NM|RBC||4.5|10*6/uL
+OBX|3|NM|HGB||13.8|g/dL
+```
+
+**Output:**
+```json
+{
+  "segments": [
+    { "name": "MSH", "fields": ["|", "^~\\&", "Lab", "Fac", "", "", "", "", ["ORU", "R01"], "1", "P", "2.3"] },
+    { "name": "PID", "fields": ["1", "", "12345"] },
+    { "name": "OBR", "fields": ["1", "", "", "CBC"] },
+    { "name": "OBX", "fields": ["1", "NM", "WBC", "", "7.2", "10*3/uL"] },
+    { "name": "OBX", "fields": ["2", "NM", "RBC", "", "4.5", "10*6/uL"] },
+    { "name": "OBX", "fields": ["3", "NM", "HGB", "", "13.8", "g/dL"] }
+  ]
+}
+```
+
+To extract all OBX segments from a parsed message:
+
+```python
+obx_segments = [s for s in msg["segments"] if s["name"] == "OBX"]
+for obx in obx_segments:
+    test_name = obx["fields"][2]   # OBX-3: observation identifier
+    value     = obx["fields"][4]   # OBX-5: observation value
+    units     = obx["fields"][5]   # OBX-6: units
+    print(f"{test_name}: {value} {units}")
+# WBC: 7.2 10*3/uL
+# RBC: 4.5 10*6/uL
+# HGB: 13.8 g/dL
+```
+
+### Example: sub-components (`&` separator)
+
+**Input:** `TST|auth_id&universal_id&universal_type`
+
+**Output:**
+```json
+{ "name": "TST", "fields": [["auth_id", "universal_id", "universal_type"]] }
+```
+
+Sub-components and components both collapse to a list of strings when there is only
+one level of nesting. A field with both components *and* sub-components produces
+nested lists:
+
+**Input:** `TST|a&b^c` (first component has 2 sub-components, second has 1)
+
+**Output:**
+```json
+{ "name": "TST", "fields": [[["a", "b"], "c"]] }
+```
+
 ## API Reference
 
 | Function | Returns | Description |
