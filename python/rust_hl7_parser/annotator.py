@@ -3,7 +3,8 @@ HL7v2 Annotated JSON Output
 ============================
 
 Produces self-describing JSON where every field carries its HL7 name,
-position, and value — no prior HL7 knowledge required to consume the output.
+position, type code, and value — no prior HL7 knowledge required to consume
+the output.
 
 Usage::
 
@@ -14,9 +15,10 @@ Usage::
         "PID|1||12345^^^MRN||Doe^John^M"
     )
     pid5 = next(f for f in ann["segments"][1]["fields"] if f["position"] == "PID-5")
-    print(pid5["name"])                           # "patient_name"
-    print(pid5["value"]["components"][0]["name"]) # "family_name"
-    print(pid5["value"]["components"][0]["value"])# "Doe"
+    print(pid5["name"])                    # "patient_name"
+    print(pid5["type"])                    # "XPN"
+    print(pid5["value"]["family_name"])    # "Doe"
+    print(pid5["value"]["given_name"])     # "John"
 
 Performance: ~5,300 msg/s — 47x faster than hl7apy.
 """
@@ -37,6 +39,11 @@ _registry = SchemaRegistry()
 
 _DATATYPES_PATH = Path(__file__).parent / "schemas" / "datatypes.json"
 _DATATYPES: dict[str, list[str]] = orjson.loads(_DATATYPES_PATH.read_bytes())
+
+# Primitive single-component types whose value stays as a plain string.
+_PRIMITIVE_TYPES: frozenset[str] = frozenset(
+    {"ST", "NM", "SI", "IS", "ID", "DT", "FT", "TX"}
+)
 
 # Regex to convert "Patient Name" / "Set ID" → "patient_name" / "set_id"
 _SPACE_OR_SLASH_RE = re.compile(r"[\s/]+")
@@ -63,23 +70,39 @@ def _component_names(field_type: str, count: int) -> list[str]:
     return result
 
 
-def _annotate_component_list(
+def _build_typed_value(
     comp_list: list[Any],
     field_type: str,
-    position_prefix: str,
-) -> list[dict[str, Any]]:
-    """Build annotated component entries for a list of component values."""
-    comp_names = _component_names(field_type, len(comp_list))
-    result: list[dict[str, Any]] = []
-    for i, comp_val in enumerate(comp_list):
-        name = comp_names[i]
-        pos = f"{position_prefix}.{i + 1}"
-        if isinstance(comp_val, list):
-            # Sub-components present — flatten to first sub-component value.
-            val: str = comp_val[0] if comp_val else ""
+) -> dict[str, str]:
+    """Build a flat typed dict from a list of component values.
+
+    Keys come from datatypes.json for *field_type*; overflow components get
+    positional keys like ``component_5``.  Sub-component lists are collapsed
+    to their first element.
+    """
+    defined_names = _DATATYPES.get(field_type, [])
+    # Determine the full set of keys to include: at least as many as defined
+    # in the schema, or as many as the parser returned — whichever is larger.
+    total = max(len(defined_names), len(comp_list))
+    result: dict[str, str] = {}
+    for i in range(total):
+        if i < len(defined_names):
+            key = defined_names[i]
         else:
-            val = comp_val if isinstance(comp_val, str) else ""
-        result.append({"name": name, "position": pos, "value": val})
+            key = f"component_{i + 1}"
+
+        if i < len(comp_list):
+            raw_val = comp_list[i]
+            if isinstance(raw_val, list):
+                # Sub-components — take the first.
+                val: str = raw_val[0] if raw_val else ""
+            else:
+                val = raw_val if isinstance(raw_val, str) else ""
+        else:
+            val = ""
+
+        result[key] = val
+
     return result
 
 
@@ -87,68 +110,71 @@ def _annotate_field_value(
     raw: Any,
     field_def: FieldDef | None,
     position: str,
-) -> Any:
-    """Convert a raw parsed field value to annotated form.
+) -> tuple[Any, bool]:
+    """Convert a raw parsed field value to the typed annotated form.
 
     The Rust parser produces the following structures:
     - ``str`` — scalar field (single value, no components)
     - ``list[str]`` — composite field: one repetition with multiple components
       (e.g. ``"Doe^John^M"`` → ``["Doe", "John", "M"]``)
     - ``list[list[str]]`` — repeating composite field: multiple repetitions,
-      each with components (e.g. ``"Smith^Jane~Jones^Bob"`` → ``[["Smith","Jane"],["Jones","Bob"]]``)
+      each with components (e.g. ``"Smith^Jane~Jones^Bob"`` →
+      ``[["Smith","Jane"],["Jones","Bob"]]``)
 
-    Returns a string for pure-scalar fields, or a dict with ``"components"``
-    or ``"repetitions"`` keys for composite/repeating fields.
+    Returns a ``(value, is_repeating)`` tuple where:
+    - *value* is a plain string for primitive types, a flat dict for composite
+      types, or a list of flat dicts for repeating composite types.
+    - *is_repeating* is True only for multi-repetition fields.
     """
     field_type: str = field_def.type if field_def is not None else "ST"
+    is_primitive = field_type in _PRIMITIVE_TYPES
 
+    # --- Scalar string from parser ---
     if isinstance(raw, str):
-        # Scalar field — no components from the parser.
-        # Only wrap in a components dict if the datatype genuinely has more
-        # than one component (e.g. HD, TS, XPN).  Primitive single-component
-        # types (ST, NM, SI, IS, ID, DT, FT, TX) stay as plain strings.
-        comp_names = _DATATYPES.get(field_type, [])
-        if len(comp_names) > 1:
-            # Composite type collapsed to a scalar — wrap as first component.
-            return {
-                "components": [
-                    {"name": comp_names[0], "position": f"{position}.1", "value": raw}
-                ]
-            }
-        return raw
+        if is_primitive:
+            return raw, False
+        # Composite type collapsed to scalar — wrap as first component.
+        defined_names = _DATATYPES.get(field_type, [])
+        if len(defined_names) > 1:
+            result: dict[str, str] = {name: "" for name in defined_names}
+            if defined_names:
+                result[defined_names[0]] = raw
+            return result, False
+        # Single-component composite (rare) — plain string.
+        return raw, False
 
     if not isinstance(raw, list) or not raw:
-        return raw if isinstance(raw, str) else ""
+        return ("" if is_primitive else {}), False
 
     first_item = raw[0]
 
+    # --- Multi-repetition: list[list] ---
     if isinstance(first_item, list):
-        # Multi-repetition field: [[comp1, comp2], [comp1, comp2], ...]
-        # Each inner list is one repetition of a composite.
-        repetitions: list[dict[str, Any]] = []
+        reps: list[dict[str, str]] = []
         for rep in raw:
             if isinstance(rep, list):
-                comps = _annotate_component_list(rep, field_type, position)
+                reps.append(_build_typed_value(rep, field_type))
             else:
                 # Single-value repetition that collapsed to a string.
-                comp_names_single = _component_names(field_type, 1)
-                comps = [{
-                    "name": comp_names_single[0],
-                    "position": f"{position}.1",
-                    "value": rep if isinstance(rep, str) else "",
-                }]
-            repetitions.append({"components": comps})
-        return {"repetitions": repetitions}
+                defined_names_rep = _DATATYPES.get(field_type, [])
+                rep_dict: dict[str, str] = {name: "" for name in defined_names_rep}
+                if defined_names_rep:
+                    rep_dict[defined_names_rep[0]] = rep if isinstance(rep, str) else ""
+                else:
+                    rep_dict["component_1"] = rep if isinstance(rep, str) else ""
+                reps.append(rep_dict)
+        return reps, True
 
+    # --- Single repetition: list[str] ---
     if isinstance(first_item, str):
-        # Flat list of strings: always the components of a single composite
-        # field (one repetition).  The Rust parser emits list[list] for
-        # multiple repetitions of composites, so a plain list[str] here
-        # always means a single repetition.
-        return {"components": _annotate_component_list(raw, field_type, position)}
+        if is_primitive:
+            # Primitive types that happen to arrive as a list (shouldn't
+            # occur in practice, but be defensive).
+            return first_item, False
+        return _build_typed_value(raw, field_type), False
 
-    # Fallback: return raw as-is.
-    return raw
+    # Fallback.
+    return raw, False
 
 
 def _annotate_segment(
@@ -165,11 +191,12 @@ def _annotate_segment(
         field_num = i + 1  # 1-based
         position = f"{seg_name}-{field_num}"
 
-        # Special handling for MSH-1 and MSH-2.
+        # Special handling for MSH-1 and MSH-2 — always plain strings.
         if seg_name == "MSH" and field_num == 1:
             annotated_fields.append({
                 "name": "field_separator",
                 "position": position,
+                "type": "ST",
                 "value": raw if isinstance(raw, str) else "",
             })
             continue
@@ -177,6 +204,7 @@ def _annotate_segment(
             annotated_fields.append({
                 "name": "encoding_characters",
                 "position": position,
+                "type": "ST",
                 "value": raw if isinstance(raw, str) else "",
             })
             continue
@@ -190,12 +218,19 @@ def _annotate_segment(
                 field_def = fd
                 field_name = _to_snake(fd.name)
 
-        annotated_value = _annotate_field_value(raw, field_def, position)
-        annotated_fields.append({
+        field_type: str = field_def.type if field_def is not None else "ST"
+        annotated_value, is_repeating = _annotate_field_value(raw, field_def, position)
+
+        entry: dict[str, Any] = {
             "name": field_name,
             "position": position,
+            "type": field_type,
             "value": annotated_value,
-        })
+        }
+        if is_repeating:
+            entry["repeating"] = True
+
+        annotated_fields.append(entry)
 
     return {"name": seg_name, "fields": annotated_fields}
 
@@ -208,9 +243,10 @@ def parse_annotated(
 ) -> dict[str, Any]:
     """Parse an HL7v2 message and return an annotated dict.
 
-    Every field in the output carries its HL7 name, position string, and
-    value.  Composite fields are expanded to a ``{"components": [...]}``
-    dict; repeating fields to ``{"repetitions": [{"components": [...]}, ...]}``.
+    Every field in the output carries its HL7 ``name``, ``position`` string,
+    ``type`` (HL7 datatype code), and ``value``.  Composite fields have their
+    value as a flat dict keyed by component name.  Repeating fields have their
+    value as a list of such dicts and also carry ``"repeating": true``.
 
     Parameters
     ----------

@@ -1,4 +1,4 @@
-"""Tests for rust_hl7_parser.annotator — annotated JSON output."""
+"""Tests for rust_hl7_parser.annotator — annotated JSON output (typed format)."""
 
 from __future__ import annotations
 
@@ -66,51 +66,55 @@ def _seg(ann: dict[str, Any], name: str, occurrence: int = 1) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 def test_scalar_field_has_name_position_value() -> None:
-    """Scalar fields produce a dict with name, position, and string value."""
+    """Scalar fields produce a dict with name, position, type, and string value."""
     ann = parse_annotated(ADT_MSG)
     pid = _seg(ann, "PID")
     f1 = _find_field(pid, "PID-1")
     assert f1 is not None
     assert f1["name"] == "set_id"
     assert f1["position"] == "PID-1"
+    assert f1["type"] == "SI"
     assert f1["value"] == "1"
 
 
 def test_scalar_sex_field() -> None:
-    """Administrative sex (PID-8) returns as a scalar string."""
+    """Administrative sex (PID-8) returns as a scalar string with IS type."""
     ann = parse_annotated(ADT_MSG)
     pid = _seg(ann, "PID")
     f8 = _find_field(pid, "PID-8")
     assert f8 is not None
+    assert f8["type"] == "IS"
     assert f8["value"] == "M"
 
 
 # ---------------------------------------------------------------------------
-# Composite fields (components)
+# Composite fields (typed flat dicts)
 # ---------------------------------------------------------------------------
 
 def test_composite_field_has_components() -> None:
-    """Composite fields (XPN etc.) produce a components list."""
+    """Composite fields (XPN etc.) produce a flat dict keyed by component name."""
     ann = parse_annotated(ADT_MSG)
     pid = _seg(ann, "PID")
     f5 = _find_field(pid, "PID-5")
     assert f5 is not None
     assert f5["name"] == "patient_name"
     value = f5["value"]
-    assert "components" in value
+    assert isinstance(value, dict)
+    assert "family_name" in value
 
 
 def test_composite_field_component_names_from_datatype() -> None:
-    """Component names come from the datatypes.json XPN mapping."""
+    """Component keys come from the datatypes.json XPN mapping."""
     ann = parse_annotated(ADT_MSG)
     pid = _seg(ann, "PID")
     f5 = _find_field(pid, "PID-5")
     assert f5 is not None
-    components = f5["value"]["components"]
+    value = f5["value"]
+    assert isinstance(value, dict)
     # XPN: family_name, given_name, middle_name, ...
-    assert components[0]["name"] == "family_name"
-    assert components[1]["name"] == "given_name"
-    assert components[2]["name"] == "middle_name"
+    assert "family_name" in value
+    assert "given_name" in value
+    assert "middle_name" in value
 
 
 def test_composite_field_component_values() -> None:
@@ -119,41 +123,38 @@ def test_composite_field_component_values() -> None:
     pid = _seg(ann, "PID")
     f5 = _find_field(pid, "PID-5")
     assert f5 is not None
-    components = f5["value"]["components"]
-    assert components[0]["value"] == "Doe"
-    assert components[1]["value"] == "John"
-    assert components[2]["value"] == "M"
+    value = f5["value"]
+    assert isinstance(value, dict)
+    assert value["family_name"] == "Doe"
+    assert value["given_name"] == "John"
+    assert value["middle_name"] == "M"
 
 
-def test_composite_field_component_positions() -> None:
-    """Component position strings are formatted as 'SEG-N.C'."""
+def test_composite_field_type_key() -> None:
+    """Composite fields carry a 'type' key with the HL7 datatype code."""
     ann = parse_annotated(ADT_MSG)
     pid = _seg(ann, "PID")
     f5 = _find_field(pid, "PID-5")
     assert f5 is not None
-    components = f5["value"]["components"]
-    assert components[0]["position"] == "PID-5.1"
-    assert components[1]["position"] == "PID-5.2"
-    assert components[2]["position"] == "PID-5.3"
+    assert f5["type"] == "XPN"
 
 
 def test_cx_field_components() -> None:
-    """CX fields (PID-3) produce components named from the CX datatype."""
+    """CX fields (PID-3) produce a flat dict with CX component keys."""
     ann = parse_annotated(ADT_MSG)
     pid = _seg(ann, "PID")
     f3 = _find_field(pid, "PID-3")
     assert f3 is not None
     value = f3["value"]
-    # Could be wrapped in repetitions since PID-3 is repeating and CX is composite.
-    if "repetitions" in value:
-        components = value["repetitions"][0]["components"]
+    # Could be a list (repeating) or a single dict.
+    if isinstance(value, list):
+        components = value[0]
     else:
-        components = value["components"]
+        assert isinstance(value, dict)
+        components = value
     # CX: id_number, check_digit, check_digit_scheme, assigning_authority, ...
-    assert components[0]["name"] == "id_number"
-    assert components[0]["value"] == "12345"
-    assert components[3]["name"] == "assigning_authority"
-    assert components[3]["value"] == "MRN"
+    assert components["id_number"] == "12345"
+    assert components["assigning_authority"] == "MRN"
 
 
 # ---------------------------------------------------------------------------
@@ -161,38 +162,39 @@ def test_cx_field_components() -> None:
 # ---------------------------------------------------------------------------
 
 def test_msh1_is_field_separator() -> None:
-    """MSH-1 is always named 'field_separator' regardless of schema."""
+    """MSH-1 is always named 'field_separator' with type ST."""
     ann = parse_annotated(ADT_MSG)
     msh = _seg(ann, "MSH")
     f1 = _find_field(msh, "MSH-1")
     assert f1 is not None
     assert f1["name"] == "field_separator"
+    assert f1["type"] == "ST"
     assert f1["value"] == "|"
 
 
 def test_msh2_is_encoding_characters() -> None:
-    """MSH-2 is always named 'encoding_characters' regardless of schema."""
+    """MSH-2 is always named 'encoding_characters' with type ST."""
     ann = parse_annotated(ADT_MSG)
     msh = _seg(ann, "MSH")
     f2 = _find_field(msh, "MSH-2")
     assert f2 is not None
     assert f2["name"] == "encoding_characters"
+    assert f2["type"] == "ST"
     assert f2["value"] == "^~\\&"
 
 
 def test_msh9_message_type_field() -> None:
-    """MSH-9 (Message Type) has component names from MSG/CM datatype."""
+    """MSH-9 (Message Type) has a flat dict with MSG/CM component keys."""
     ann = parse_annotated(ADT_MSG)
     msh = _seg(ann, "MSH")
     f9 = _find_field(msh, "MSH-9")
     assert f9 is not None
+    # Type is either "CM" or "MSG" depending on the schema version.
+    assert f9["type"] in {"CM", "MSG"}
     value = f9["value"]
-    assert "components" in value
-    comps = value["components"]
-    assert comps[0]["name"] == "message_code"
-    assert comps[0]["value"] == "ADT"
-    assert comps[1]["name"] == "trigger_event"
-    assert comps[1]["value"] == "A01"
+    assert isinstance(value, dict)
+    assert value["message_code"] == "ADT"
+    assert value["trigger_event"] == "A01"
 
 
 # ---------------------------------------------------------------------------
@@ -200,13 +202,14 @@ def test_msh9_message_type_field() -> None:
 # ---------------------------------------------------------------------------
 
 def test_repeating_composite_field_gets_repetitions_wrapper() -> None:
-    """Repeating composite fields (e.g. NK1-2 with ~) get a repetitions key."""
+    """Repeating composite fields (e.g. NK1-2 with ~) are a list with repeating=True."""
     ann = parse_annotated(REPEATING)
     nk1 = _seg(ann, "NK1")
     f2 = _find_field(nk1, "NK1-2")
     assert f2 is not None
     value = f2["value"]
-    assert "repetitions" in value, f"Expected 'repetitions' key, got: {list(value.keys())}"
+    assert isinstance(value, list), f"Expected list, got: {type(value)}"
+    assert f2.get("repeating") is True
 
 
 def test_repeating_field_correct_values() -> None:
@@ -215,25 +218,27 @@ def test_repeating_field_correct_values() -> None:
     nk1 = _seg(ann, "NK1")
     f2 = _find_field(nk1, "NK1-2")
     assert f2 is not None
-    reps = f2["value"]["repetitions"]
-    assert len(reps) == 2
+    value = f2["value"]
+    assert isinstance(value, list)
+    assert len(value) == 2
     # First rep: Smith^Jane
-    assert reps[0]["components"][0]["value"] == "Smith"
-    assert reps[0]["components"][1]["value"] == "Jane"
+    assert value[0]["family_name"] == "Smith"
+    assert value[0]["given_name"] == "Jane"
     # Second rep: Jones^Bob
-    assert reps[1]["components"][0]["value"] == "Jones"
-    assert reps[1]["components"][1]["value"] == "Bob"
+    assert value[1]["family_name"] == "Jones"
+    assert value[1]["given_name"] == "Bob"
 
 
 def test_repeating_field_component_names() -> None:
-    """Repetition components carry XPN datatype names."""
+    """Repetition dicts carry XPN datatype keys."""
     ann = parse_annotated(REPEATING)
     nk1 = _seg(ann, "NK1")
     f2 = _find_field(nk1, "NK1-2")
     assert f2 is not None
-    first_rep = f2["value"]["repetitions"][0]
-    assert first_rep["components"][0]["name"] == "family_name"
-    assert first_rep["components"][1]["name"] == "given_name"
+    value = f2["value"]
+    assert isinstance(value, list)
+    assert "family_name" in value[0]
+    assert "given_name" in value[0]
 
 
 # ---------------------------------------------------------------------------
@@ -252,11 +257,12 @@ def test_multiple_obx_segments_annotated_independently() -> None:
         f5 = _find_field(obx, "OBX-5")
         assert f5 is not None
         v = f5["value"]
-        # Might be wrapped as composite or scalar
+        # Scalar or composite dict — extract the string value.
         if isinstance(v, str):
             values.append(v)
-        elif "components" in v:
-            values.append(v["components"][0]["value"])
+        elif isinstance(v, dict):
+            # Take the first dict value (the primary component).
+            values.append(next(iter(v.values()), ""))
         else:
             values.append(str(v))
     assert values == ["7.2", "4.5", "13.8"]
@@ -276,8 +282,9 @@ def test_version_auto_detected_from_msh12() -> None:
     pid = _seg(ann, "PID")
     f5 = _find_field(pid, "PID-5")
     assert f5 is not None
-    # Should still get family_name from XPN
-    assert f5["value"]["components"][0]["name"] == "family_name"
+    value = f5["value"]
+    assert isinstance(value, dict)
+    assert value["family_name"] == "Smith"
 
 
 def test_version_override_parameter() -> None:
@@ -286,7 +293,9 @@ def test_version_override_parameter() -> None:
     pid = _seg(ann, "PID")
     f5 = _find_field(pid, "PID-5")
     assert f5 is not None
-    assert f5["value"]["components"][0]["name"] == "family_name"
+    value = f5["value"]
+    assert isinstance(value, dict)
+    assert value["family_name"] == "Doe"
 
 
 # ---------------------------------------------------------------------------
@@ -328,13 +337,15 @@ def test_parse_annotated_json_roundtrip() -> None:
 
 
 def test_parse_annotated_json_pid5_components() -> None:
-    """JSON output contains correct PID-5 components via round-trip."""
+    """JSON output contains correct PID-5 component values via round-trip."""
     data = json.loads(parse_annotated_json(ADT_MSG))
     pid = next(s for s in data["segments"] if s["name"] == "PID")
     f5 = next(f for f in pid["fields"] if f["position"] == "PID-5")
-    comps = f5["value"]["components"]
-    assert comps[0]["name"] == "family_name"
-    assert comps[0]["value"] == "Doe"
+    assert f5["type"] == "XPN"
+    value = f5["value"]
+    assert isinstance(value, dict)
+    assert value["family_name"] == "Doe"
+    assert value["given_name"] == "John"
 
 
 # ---------------------------------------------------------------------------
@@ -353,18 +364,14 @@ def test_lenient_mode_does_not_raise_on_unknown_segment() -> None:
 # ---------------------------------------------------------------------------
 
 def test_pv1_location_pl_components() -> None:
-    """PV1-3 uses PL datatype and produces correct component names."""
+    """PV1-3 uses PL datatype and produces a flat dict with PL component keys."""
     ann = parse_annotated(ADT_MSG)
     pv1 = _seg(ann, "PV1")
     f3 = _find_field(pv1, "PV1-3")
     assert f3 is not None
     value = f3["value"]
-    assert "components" in value
-    comps = value["components"]
+    assert isinstance(value, dict)
     # PL: point_of_care, room, bed, ...
-    assert comps[0]["name"] == "point_of_care"
-    assert comps[0]["value"] == "ICU"
-    assert comps[1]["name"] == "room"
-    assert comps[1]["value"] == "Bed1"
-    assert comps[2]["name"] == "bed"
-    assert comps[2]["value"] == "Main"
+    assert value["point_of_care"] == "ICU"
+    assert value["room"] == "Bed1"
+    assert value["bed"] == "Main"

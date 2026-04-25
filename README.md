@@ -10,7 +10,7 @@ A fast HL7v2 message parser written in Rust with Python bindings.
 - **Zero-copy Rust parser via PyO3** — returns native Python dicts with no intermediate representations
 - **Lenient mode** skips malformed segments and reports structured warnings instead of raising
 - **JSON output path** (`parse_json`, `parse_file_json`) avoids Python dict construction overhead entirely
-- **Annotated JSON output** (`parse_annotated_json`) embeds HL7 field names in every value for self-describing JSON
+- **Typed annotated JSON output** (`parse_annotated_json`) embeds HL7 field names, type codes, and flat component dicts in every value for self-describing JSON
 - **HL7 path accessor** (`get(msg, "PID-5.1")`) — extract fields using standard HL7 notation
 - **File parsing** with automatic message splitting: blank-line separation, MSH-restart detection, MLLP framing stripped automatically
 - **Batch parsing** for in-memory message lists via `parse_batch`
@@ -161,9 +161,10 @@ data = json.loads(annotated)
 
 pid_fields = data["segments"][1]["fields"]
 pid5 = next(f for f in pid_fields if f["position"] == "PID-5")
-print(pid5["name"])                          # "patient_name"
-print(pid5["value"]["components"][0]["name"]) # "family_name"
-print(pid5["value"]["components"][0]["value"]) # "Doe"
+print(pid5["name"])                    # "patient_name"
+print(pid5["type"])                    # "XPN"
+print(pid5["value"]["family_name"])    # "Doe"
+print(pid5["value"]["given_name"])     # "John"
 ```
 
 ## Choosing an output format
@@ -182,7 +183,7 @@ All numbers from 5,000 real NHS HL7v2 messages (avg 1,792 chars). For comparison
 
 **Fast path (positional):** Use `parse_json()` when throughput matters and your downstream system already understands HL7 field positions. The JSON structure uses positional arrays — `fields[8]` is MSH-9, `fields[4]` is PID-5. See "Output structure" below for the full mapping.
 
-**Self-describing path (annotated):** Use `parse_annotated_json()` when the JSON will be consumed by systems or teams that don't want to memorize HL7 field positions. Every field carries its HL7 name, position, and value. ~6x slower than the fast path but still 47x faster than hl7apy.
+**Self-describing path (annotated):** Use `parse_annotated_json()` when the JSON will be consumed by systems or teams that don't want to memorize HL7 field positions. Every field carries its HL7 name, position, type code, and value. Composite values are flat dicts keyed by component name — access `pid5["value"]["family_name"]` directly. ~6x slower than the fast path but still 47x faster than hl7apy.
 
 **Python accessor path:** Use `parse()` + `get(msg, "PID-5.1")` when you're building Python objects (Pydantic models, dataclasses) and want HL7-native field notation without the overhead of annotated JSON.
 
@@ -388,8 +389,10 @@ nested lists:
 
 Annotated output transforms the positional arrays into self-describing objects. Every
 field carries its `name` (the HL7 field name from the schema), `position` (the HL7
-path string), and `value`. Component fields nest their component names recursively.
-Repeating fields use a `repetitions` wrapper.
+path string), `type` (the HL7 datatype code, e.g. `"XPN"`, `"CX"`, `"PL"`), and
+`value`. Composite field values are flat dicts keyed by component name from the HL7
+datatype definition. Repeating fields have their value as a list of such dicts and
+carry `"repeating": true`.
 
 This format is ~6x slower than positional output but still 47x faster than hl7apy,
 and it eliminates the need for consumers to know HL7 field positions.
@@ -410,70 +413,80 @@ PV1|1|I|ICU^Bed1^Main
     {
       "name": "MSH",
       "fields": [
-        {"name": "field_separator",    "position": "MSH-1",  "value": "|"},
-        {"name": "encoding_characters","position": "MSH-2",  "value": "^~\\&"},
-        {"name": "sending_application","position": "MSH-3",  "value": {"components": [{"name": "namespace_id", "position": "MSH-3.1", "value": "SendingApp"}]}},
-        {"name": "sending_facility",   "position": "MSH-4",  "value": {"components": [{"name": "namespace_id", "position": "MSH-4.1", "value": "SendingFac"}]}},
-        {"name": "security",           "position": "MSH-8",  "value": ""},
+        {"name": "field_separator",    "position": "MSH-1",  "type": "ST",  "value": "|"},
+        {"name": "encoding_characters","position": "MSH-2",  "type": "ST",  "value": "^~\\&"},
+        {"name": "sending_application","position": "MSH-3",  "type": "HD",  "value": {"namespace_id": "SendingApp", "universal_id": "", "universal_id_type": ""}},
+        {"name": "sending_facility",   "position": "MSH-4",  "type": "HD",  "value": {"namespace_id": "SendingFac", "universal_id": "", "universal_id_type": ""}},
+        {"name": "security",           "position": "MSH-8",  "type": "ST",  "value": ""},
         {
           "name": "message_type",
           "position": "MSH-9",
-          "value": {
-            "components": [
-              {"name": "message_code",  "position": "MSH-9.1", "value": "ADT"},
-              {"name": "trigger_event", "position": "MSH-9.2", "value": "A01"}
-            ]
-          }
+          "type": "CM",
+          "value": {"message_code": "ADT", "trigger_event": "A01", "message_structure": ""}
         },
-        {"name": "message_control_id", "position": "MSH-10", "value": "MSG00001"},
-        {"name": "version_id",         "position": "MSH-12", "value": "2.3"}
+        {"name": "message_control_id", "position": "MSH-10", "type": "ST",  "value": "MSG00001"},
+        {"name": "version_id",         "position": "MSH-12", "type": "ID",  "value": "2.3"}
       ]
     },
     {
       "name": "PID",
       "fields": [
-        {"name": "set_id", "position": "PID-1", "value": "1"},
+        {"name": "set_id", "position": "PID-1", "type": "SI", "value": "1"},
         {
           "name": "patient_identifier_list",
           "position": "PID-3",
+          "type": "CX",
           "value": {
-            "components": [
-              {"name": "id_number",          "position": "PID-3.1", "value": "12345"},
-              {"name": "check_digit",        "position": "PID-3.2", "value": ""},
-              {"name": "check_digit_scheme", "position": "PID-3.3", "value": ""},
-              {"name": "assigning_authority","position": "PID-3.4", "value": "MRN"}
-            ]
+            "id_number": "12345",
+            "check_digit": "",
+            "check_digit_scheme": "",
+            "assigning_authority": "MRN",
+            "identifier_type_code": "",
+            "assigning_facility": ""
           }
         },
         {
           "name": "patient_name",
           "position": "PID-5",
+          "type": "XPN",
           "value": {
-            "components": [
-              {"name": "family_name", "position": "PID-5.1", "value": "Doe"},
-              {"name": "given_name",  "position": "PID-5.2", "value": "John"},
-              {"name": "middle_name", "position": "PID-5.3", "value": "M"}
-            ]
+            "family_name": "Doe",
+            "given_name": "John",
+            "middle_name": "M",
+            "suffix": "",
+            "prefix": "",
+            "degree": "",
+            "name_type_code": ""
           }
         },
-        {"name": "date_time_of_birth", "position": "PID-7", "value": {"components": [{"name": "time", "position": "PID-7.1", "value": "19800101"}]}},
-        {"name": "administrative_sex",  "position": "PID-8", "value": "M"}
+        {
+          "name": "date_time_of_birth",
+          "position": "PID-7",
+          "type": "TS",
+          "value": {"time": "19800101", "degree_of_precision": ""}
+        },
+        {"name": "administrative_sex", "position": "PID-8", "type": "IS", "value": "M"}
       ]
     },
     {
       "name": "PV1",
       "fields": [
-        {"name": "set_id",      "position": "PV1-1", "value": "1"},
-        {"name": "patient_class","position": "PV1-2", "value": "I"},
+        {"name": "set_id",       "position": "PV1-1", "type": "SI", "value": "1"},
+        {"name": "patient_class","position": "PV1-2", "type": "IS", "value": "I"},
         {
           "name": "assigned_patient_location",
           "position": "PV1-3",
+          "type": "PL",
           "value": {
-            "components": [
-              {"name": "point_of_care", "position": "PV1-3.1", "value": "ICU"},
-              {"name": "room",          "position": "PV1-3.2", "value": "Bed1"},
-              {"name": "bed",           "position": "PV1-3.3", "value": "Main"}
-            ]
+            "point_of_care": "ICU",
+            "room": "Bed1",
+            "bed": "Main",
+            "facility": "",
+            "location_status": "",
+            "person_location_type": "",
+            "building": "",
+            "floor": "",
+            "location_description": ""
           }
         }
       ]
@@ -491,39 +504,34 @@ PV1|1|I|ICU^Bed1^Main
 {
   "name": "NK1",
   "fields": [
-    {"name": "set_id", "position": "NK1-1", "value": "1"},
+    {"name": "set_id", "position": "NK1-1", "type": "SI", "value": "1"},
     {
       "name": "name",
       "position": "NK1-2",
-      "value": {
-        "repetitions": [
-          {
-            "components": [
-              {"name": "family_name", "position": "NK1-2.1", "value": "Smith"},
-              {"name": "given_name",  "position": "NK1-2.2", "value": "Jane"}
-            ]
-          },
-          {
-            "components": [
-              {"name": "family_name", "position": "NK1-2.1", "value": "Jones"},
-              {"name": "given_name",  "position": "NK1-2.2", "value": "Bob"}
-            ]
-          }
-        ]
-      }
+      "type": "XPN",
+      "repeating": true,
+      "value": [
+        {"family_name": "Smith", "given_name": "Jane", "middle_name": "", "suffix": "", "prefix": "", "degree": "", "name_type_code": ""},
+        {"family_name": "Jones", "given_name": "Bob",  "middle_name": "", "suffix": "", "prefix": "", "degree": "", "name_type_code": ""}
+      ]
     },
     {
       "name": "relationship",
       "position": "NK1-3",
-      "value": {"components": [{"name": "identifier", "position": "NK1-3.1", "value": "SPO"}]}
+      "type": "CE",
+      "repeating": true,
+      "value": [
+        {"identifier": "SPO", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""},
+        {"identifier": "EMC", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}
+      ]
     }
   ]
 }
 ```
 
-Repeating fields use a `"repetitions"` wrapper containing a list of component
-objects. Each repetition has the same component structure as a non-repeating
-composite field.
+Repeating fields carry `"repeating": true` and their `value` is a list of flat
+typed dicts. Each dict in the list has the same keys as a non-repeating composite
+field of the same datatype.
 
 #### Example: repeating OBX segments
 
@@ -535,34 +543,34 @@ Each OBX segment is annotated independently. All three segments in the
   {
     "name": "OBX",
     "fields": [
-      {"name": "set_id",                "position": "OBX-1", "value": "1"},
-      {"name": "value_type",            "position": "OBX-2", "value": "NM"},
-      {"name": "observation_identifier","position": "OBX-3", "value": {"components": [{"name": "identifier", "position": "OBX-3.1", "value": "WBC"}]}},
-      {"name": "observation_subid",     "position": "OBX-4", "value": ""},
-      {"name": "observation_value",     "position": "OBX-5", "value": "7.2"},
-      {"name": "units",                 "position": "OBX-6", "value": {"components": [{"name": "identifier", "position": "OBX-6.1", "value": "10*3/uL"}]}}
+      {"name": "set_id",                "position": "OBX-1", "type": "SI", "value": "1"},
+      {"name": "value_type",            "position": "OBX-2", "type": "ID", "value": "NM"},
+      {"name": "observation_identifier","position": "OBX-3", "type": "CE", "value": {"identifier": "WBC", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}},
+      {"name": "observation_subid",     "position": "OBX-4", "type": "ST", "value": ""},
+      {"name": "observation_value",     "position": "OBX-5", "type": "ST", "value": "7.2"},
+      {"name": "units",                 "position": "OBX-6", "type": "CE", "value": {"identifier": "10*3/uL", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}}
     ]
   },
   {
     "name": "OBX",
     "fields": [
-      {"name": "set_id",                "position": "OBX-1", "value": "2"},
-      {"name": "value_type",            "position": "OBX-2", "value": "NM"},
-      {"name": "observation_identifier","position": "OBX-3", "value": {"components": [{"name": "identifier", "position": "OBX-3.1", "value": "RBC"}]}},
-      {"name": "observation_subid",     "position": "OBX-4", "value": ""},
-      {"name": "observation_value",     "position": "OBX-5", "value": "4.5"},
-      {"name": "units",                 "position": "OBX-6", "value": {"components": [{"name": "identifier", "position": "OBX-6.1", "value": "10*6/uL"}]}}
+      {"name": "set_id",                "position": "OBX-1", "type": "SI", "value": "2"},
+      {"name": "value_type",            "position": "OBX-2", "type": "ID", "value": "NM"},
+      {"name": "observation_identifier","position": "OBX-3", "type": "CE", "value": {"identifier": "RBC", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}},
+      {"name": "observation_subid",     "position": "OBX-4", "type": "ST", "value": ""},
+      {"name": "observation_value",     "position": "OBX-5", "type": "ST", "value": "4.5"},
+      {"name": "units",                 "position": "OBX-6", "type": "CE", "value": {"identifier": "10*6/uL", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}}
     ]
   },
   {
     "name": "OBX",
     "fields": [
-      {"name": "set_id",                "position": "OBX-1", "value": "3"},
-      {"name": "value_type",            "position": "OBX-2", "value": "NM"},
-      {"name": "observation_identifier","position": "OBX-3", "value": {"components": [{"name": "identifier", "position": "OBX-3.1", "value": "HGB"}]}},
-      {"name": "observation_subid",     "position": "OBX-4", "value": ""},
-      {"name": "observation_value",     "position": "OBX-5", "value": "13.8"},
-      {"name": "units",                 "position": "OBX-6", "value": {"components": [{"name": "identifier", "position": "OBX-6.1", "value": "g/dL"}]}}
+      {"name": "set_id",                "position": "OBX-1", "type": "SI", "value": "3"},
+      {"name": "value_type",            "position": "OBX-2", "type": "ID", "value": "NM"},
+      {"name": "observation_identifier","position": "OBX-3", "type": "CE", "value": {"identifier": "HGB", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}},
+      {"name": "observation_subid",     "position": "OBX-4", "type": "ST", "value": ""},
+      {"name": "observation_value",     "position": "OBX-5", "type": "ST", "value": "13.8"},
+      {"name": "units",                 "position": "OBX-6", "type": "CE", "value": {"identifier": "g/dL", "text": "", "coding_system": "", "alt_identifier": "", "alt_text": "", "alt_coding_system": ""}}
     ]
   }
 ]
@@ -572,9 +580,9 @@ Each OBX segment is annotated independently. All three segments in the
 
 ### Pydantic integration (consuming annotated JSON)
 
-Annotated JSON is designed to be consumed directly by typed Python objects. The
-`val()` and `comp()` helper functions below convert the position-keyed structure
-into scalar strings, making Pydantic model construction straightforward.
+With the typed format, component values are directly accessible as dict keys —
+no helper functions needed for composite fields. The `val()` helper is still
+useful for plain scalar fields; a `typed()` helper covers composite fields.
 
 ```python
 import json
@@ -583,7 +591,7 @@ from rust_hl7_parser import parse_annotated_json
 
 
 def val(fields_by_pos: dict, position: str) -> str:
-    """Return the scalar value for a field position, e.g. 'MSH-3'."""
+    """Return the scalar string value for a field position, e.g. 'MSH-3'."""
     entry = fields_by_pos.get(position)
     if entry is None:
         return ""
@@ -591,21 +599,18 @@ def val(fields_by_pos: dict, position: str) -> str:
     return v if isinstance(v, str) else ""
 
 
-def comp(fields_by_pos: dict, position: str) -> str:
-    """Return a component value by dotted position, e.g. 'PID-5.1'.
+def typed(fields_by_pos: dict, position: str, key: str) -> str:
+    """Return a component value from a typed composite field.
 
-    Splits on the last dot to find the parent field ('PID-5') and then
-    the component index (1-based) within that field's components list.
+    Example: typed(pid, "PID-5", "family_name")
     """
-    parent, _, idx_str = position.rpartition(".")
-    entry = fields_by_pos.get(parent)
+    entry = fields_by_pos.get(position)
     if entry is None:
         return ""
-    components = entry.get("value", {}).get("components", [])
-    idx = int(idx_str) - 1  # convert 1-based HL7 index to 0-based
-    if idx < 0 or idx >= len(components):
-        return ""
-    return components[idx].get("value", "") or ""
+    value = entry.get("value", {})
+    if isinstance(value, dict):
+        return value.get(key, "") or ""
+    return ""
 
 
 class MessageHeader(BaseModel):
@@ -658,26 +663,26 @@ class PatientVisit(BaseModel):
 
         return cls(
             header=MessageHeader(
-                sending_application=val(msh, "MSH-3"),
-                sending_facility=val(msh, "MSH-4"),
-                message_type=comp(msh, "MSH-9.1"),
+                sending_application=typed(msh, "MSH-3", "namespace_id"),
+                sending_facility=typed(msh, "MSH-4", "namespace_id"),
+                message_type=typed(msh, "MSH-9", "message_code"),
                 message_control_id=val(msh, "MSH-10"),
                 version=val(msh, "MSH-12"),
             ),
             patient=Patient(
-                patient_id=comp(pid, "PID-3.1"),
-                assigning_authority=comp(pid, "PID-3.4"),
+                patient_id=typed(pid, "PID-3", "id_number"),
+                assigning_authority=typed(pid, "PID-3", "assigning_authority"),
                 name=PatientName(
-                    family_name=comp(pid, "PID-5.1"),
-                    given_name=comp(pid, "PID-5.2"),
-                    middle_name=comp(pid, "PID-5.3"),
+                    family_name=typed(pid, "PID-5", "family_name"),
+                    given_name=typed(pid, "PID-5", "given_name"),
+                    middle_name=typed(pid, "PID-5", "middle_name"),
                 ),
-                date_of_birth=val(pid, "PID-7"),
+                date_of_birth=typed(pid, "PID-7", "time"),
                 sex=val(pid, "PID-8"),
             ),
             visit=Visit(
                 patient_class=val(pv1, "PV1-2"),
-                assigned_location=comp(pv1, "PV1-3.1"),
+                assigned_location=typed(pv1, "PV1-3", "point_of_care"),
                 admission_type=val(pv1, "PV1-4"),
             ),
         )
@@ -698,7 +703,7 @@ print(visit.model_dump_json(indent=2))
 #              "message_type": "ADT", "message_control_id": "MSG00042", "version": "2.4"},
 #   "patient": {"patient_id": "98765", "assigning_authority": "MRN",
 #               "name": {"family_name": "Smith", "given_name": "Jane", "middle_name": "A"},
-#               "date_of_birth": "", "sex": "F"},
+#               "date_of_birth": "19800101", "sex": "F"},
 #   "visit": {"patient_class": "I", "assigned_location": "ICU", "admission_type": "E"}
 # }
 ```

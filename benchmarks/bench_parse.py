@@ -88,6 +88,34 @@ def bench_rust_parse_json(messages: list[str]) -> tuple[float, int, int]:
     return elapsed, ok, fail
 
 
+def bench_rust_parse_annotated(messages: list[str]) -> tuple[float, int, int]:
+    from rust_hl7_parser import parse_annotated
+    ok = fail = 0
+    t0 = time.perf_counter()
+    for m in messages:
+        try:
+            parse_annotated(m, strict=False)
+            ok += 1
+        except Exception:
+            fail += 1
+    elapsed = time.perf_counter() - t0
+    return elapsed, ok, fail
+
+
+def bench_rust_parse_annotated_json(messages: list[str]) -> tuple[float, int, int]:
+    from rust_hl7_parser import parse_annotated_json
+    ok = fail = 0
+    t0 = time.perf_counter()
+    for m in messages:
+        try:
+            parse_annotated_json(m, strict=False)
+            ok += 1
+        except Exception:
+            fail += 1
+    elapsed = time.perf_counter() - t0
+    return elapsed, ok, fail
+
+
 def bench_rust_batch(messages: list[str]) -> tuple[float, int, int]:
     from rust_hl7_parser import parse_batch
     t0 = time.perf_counter()
@@ -214,6 +242,12 @@ def main() -> None:
     t, ok, fail = bench_rust_batch(messages)
     print_result("rust_hl7_parser (batch)", t, ok, fail, total)
     rust_batch_time = t
+
+    t, ok, fail = bench_rust_parse_annotated(messages)
+    print_result("rust_hl7 (annotated dict)", t, ok, fail, total)
+
+    t, ok, fail = bench_rust_parse_annotated_json(messages)
+    print_result("rust_hl7 (annotated json)", t, ok, fail, total)
 
     t, ok, fail = bench_python_hl7(messages)
     print_result("python-hl7", t, ok, fail, total)
