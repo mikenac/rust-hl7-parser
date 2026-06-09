@@ -438,27 +438,59 @@ pub fn parse<'a>(
 /// holds the raw segment lines for one message, still pointing into `content`.
 /// MLLP framing bytes (\x0B, \x1C) are stripped and blank lines treated as
 /// message boundaries exactly as in `group_messages`.
+///
+/// Accepts `\r`, `\n`, and `\r\n` as line terminators so that CR-only files
+/// (the native HL7v2 format) are handled correctly as well as LF and CRLF.
 pub fn group_message_lines<'a>(content: &'a str) -> Vec<Vec<&'a str>> {
     let mut messages: Vec<Vec<&'a str>> = Vec::new();
     let mut current: Vec<&'a str> = Vec::new();
 
-    for line in content.split('\n') {
-        let stripped = line.trim_matches(|c: char| c == '\r' || c == '\x0B' || c == '\x1C');
+    // Iterate over raw lines split on \r, \n, or \r\n — same byte-scan
+    // approach used by split_lines() so that all three line-ending styles
+    // are handled uniformly without any heap allocation.
+    let bytes = content.as_bytes();
+    let len = bytes.len();
+    let mut start = 0;
+    let mut i = 0;
 
-        if stripped.is_empty() {
-            if !current.is_empty() {
-                messages.push(current);
-                current = Vec::new();
+    // Closure-like helper: process one candidate line slice.
+    // We use a local macro because Rust closures cannot borrow `messages` and
+    // `current` mutably at the same time they capture `content`.
+    macro_rules! handle_line {
+        ($slice:expr) => {{
+            let stripped: &'a str = $slice
+                .trim_matches(|c: char| c == '\x0B' || c == '\x1C');
+
+            if stripped.is_empty() {
+                if !current.is_empty() {
+                    messages.push(std::mem::take(&mut current));
+                }
+            } else {
+                if stripped.starts_with("MSH") && !current.is_empty() {
+                    messages.push(std::mem::take(&mut current));
+                }
+                current.push(stripped);
             }
-            continue;
-        }
+        }};
+    }
 
-        if stripped.starts_with("MSH") && !current.is_empty() {
-            messages.push(current);
-            current = Vec::new();
+    while i < len {
+        if bytes[i] == b'\r' {
+            handle_line!(&content[start..i]);
+            // Consume optional \n after \r (CRLF)
+            if i + 1 < len && bytes[i + 1] == b'\n' {
+                i += 1;
+            }
+            start = i + 1;
+        } else if bytes[i] == b'\n' {
+            handle_line!(&content[start..i]);
+            start = i + 1;
         }
-
-        current.push(stripped);
+        i += 1;
+    }
+    // Final line (no trailing newline)
+    if start < len {
+        handle_line!(&content[start..]);
     }
 
     if !current.is_empty() {

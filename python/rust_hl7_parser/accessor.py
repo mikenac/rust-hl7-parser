@@ -236,6 +236,72 @@ def get(
     return result if result is not None else default
 
 
+def field_reps(msg: dict[str, Any], path: str) -> list[Any]:
+    """Return all repetitions of a repeating field as a list.
+
+    Unlike :func:`get`, which silently returns only the first repetition,
+    this function returns every repetition.  Primarily useful for simple
+    repeating fields (``ST``, ``IS``, ``ID`` types) that use the ``~``
+    separator, such as:
+
+    - ``AL1-5``  Allergy Reaction Code  (e.g. ``RASH~HIVES~NAUSEA``)
+    - ``IN1-3``  Insurance Company ID   (``CX``, repeating)
+    - ``IN1-4``  Insurance Company Name (``XON``, repeating)
+
+    Parameters
+    ----------
+    msg:
+        Parsed message dict as returned by :func:`parse`.
+    path:
+        HL7 path string with segment name and field number, e.g. ``"AL1-5"``
+        or ``"IN1[2]-3"``.  Component and sub-component selectors are accepted
+        in the path string but ignored — the whole field is always returned.
+
+    Returns
+    -------
+    list
+        One entry per repetition.  A scalar (non-repeating) field returns a
+        one-element list containing the string value.  A multi-repetition
+        composite field returns a list of component lists.
+
+    .. note::
+        The collapsed Python representation cannot distinguish a single
+        composite field (``A^B`` → ``["A", "B"]``) from two simple
+        repetitions (``A~B`` → ``["A", "B"]``).  This function treats any
+        flat list as multiple repetitions.  For unambiguous component access
+        on a composite field, use :func:`get` with a component selector
+        instead.
+    """
+    m = _PATH_RE.match(path)
+    if m is None:
+        raise ValueError(
+            f"Invalid HL7 path: {path!r}. "
+            "Expected format: SEG-N or SEG[K]-N."
+        )
+
+    seg_name: str = m.group(1)
+    occurrence_str: str | None = m.group(2)
+    field_num: int = int(m.group(3))
+    occurrence: int = int(occurrence_str) if occurrence_str is not None else 1
+
+    matching = segments(msg, seg_name)
+    seg_idx = occurrence - 1
+    if seg_idx < 0 or seg_idx >= len(matching):
+        return []
+
+    fields_list: list[Any] = matching[seg_idx].get("fields", [])
+    idx = field_num - 1
+    if idx < 0 or idx >= len(fields_list):
+        return []
+
+    value: Any = fields_list[idx]
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, list):
+        return value
+    return []
+
+
 def all_values(msg: dict[str, Any], path: str) -> list[Any]:
     """Collect a field value from every occurrence of the named segment.
 

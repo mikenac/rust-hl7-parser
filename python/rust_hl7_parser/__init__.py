@@ -23,7 +23,14 @@ parse(message, strict=True) -> dict
 
 parse_json(message, strict=True) -> str
     Parse an HL7v2 message string and return a JSON-serialised string.
-    Uses the same collapsing logic as parse().
+    Uses the same collapsing logic as parse(). Lossy: components,
+    repetitions, and sub-components may all collapse to identical lists.
+
+parse_lossless_json(message, strict=True) -> str
+    Parse an HL7v2 message and return a fully lossless JSON string that
+    preserves the complete Field → Repetition → Component → SubComponent
+    hierarchy. Use for round-trip serialisation, diff tools, and HL7
+    editors. More verbose than parse_json().
 
 parse_file(path, strict=True) -> list[dict]
     Parse an HL7v2 file containing one or more messages.
@@ -49,6 +56,12 @@ parse_file_to_json(path, strict=True) -> bytes
 
 get(msg, path, *, default=None, rep=None)
     Access a field by HL7 path notation, e.g. get(msg, "PID-5.1").
+    Returns only the first repetition for repeating fields; use
+    field_reps() to get all repetitions.
+
+field_reps(msg, path) -> list
+    Return all repetitions of a repeating field as a list.
+    Useful for fields like AL1-5 (reaction codes), IN1-3 (insurer IDs).
 
 segments(msg, name) -> list[dict]
     Return all segment dicts with the given segment name.
@@ -93,9 +106,9 @@ from __future__ import annotations
 
 import orjson
 
-from rust_hl7_parser._native import parse, parse_json, parse_file, parse_file_json, parse_batch  # type: ignore[import]
+from rust_hl7_parser._native import parse, parse_json, parse_lossless_json, parse_file, parse_file_json, parse_batch  # type: ignore[import]
 from rust_hl7_parser.validator import validate, validate_file, validate_file_summary
-from rust_hl7_parser.accessor import get, segments, field, all_values, first
+from rust_hl7_parser.accessor import get, segments, field, field_reps, all_values, first
 from rust_hl7_parser.annotator import parse_annotated, parse_annotated_json
 
 
@@ -147,6 +160,7 @@ def parse_file_to_json(path: str, *, strict: bool = True) -> bytes:
 __all__ = [
     "parse",
     "parse_json",
+    "parse_lossless_json",
     "parse_file",
     "parse_file_json",
     "parse_batch",
@@ -156,6 +170,7 @@ __all__ = [
     "validate_file",
     "validate_file_summary",
     "get",
+    "field_reps",
     "segments",
     "field",
     "all_values",

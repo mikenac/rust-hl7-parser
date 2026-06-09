@@ -295,6 +295,57 @@ fn parse_json(message: &str, strict: bool) -> PyResult<String> {
     }
 }
 
+/// Parse an HL7v2 message and return a fully lossless JSON string.
+///
+/// Unlike parse_json(), which collapses single-item wrappers (e.g. a field
+/// with one repetition is returned as that repetition, not as a list), this
+/// function serialises the complete internal Rust representation without any
+/// collapsing. Every field is always ``{"repetitions": [...]}``; every
+/// repetition is always ``{"components": [...]}``;  every component is always
+/// ``{"sub_components": [...]}``.
+///
+/// Use this when you need to:
+/// - Round-trip an HL7 message (parse → edit → re-serialise to HL7 text)
+/// - Build an HL7 diff or merge tool
+/// - Distinguish ``A^B`` (components) from ``A~B`` (repetitions) from
+///   ``A&B`` (sub-components) — all three collapse to ``["A","B"]`` in
+///   parse_json() but are distinct in this output.
+///
+/// Warnings from lenient mode are not included; call parse(strict=False) if
+/// you also need the warnings list.
+///
+/// Parameters
+/// ----------
+/// message : str
+///     The raw HL7v2 message text.
+/// strict : bool, optional
+///     When True (default) raise ValueError on any parse error.
+///     When False, skip malformed segments.
+///
+/// Returns
+/// -------
+/// str
+///     Lossless JSON string. Significantly more verbose than parse_json().
+///
+/// Raises
+/// ------
+/// ValueError
+///     If parsing fails in strict mode.
+#[pyfunction]
+#[pyo3(signature = (message, strict = true))]
+fn parse_lossless_json(message: &str, strict: bool) -> PyResult<String> {
+    let mode = if strict {
+        error::ParseMode::Strict
+    } else {
+        error::ParseMode::Lenient
+    };
+    match parser::parse(message, mode) {
+        Ok((msg, _)) => serde_json::to_string(&msg)
+            .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string())),
+        Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e.message)),
+    }
+}
+
 /// Parse an HL7v2 file containing one or more messages.
 ///
 /// The file may contain messages in any common format:
@@ -472,6 +523,7 @@ fn parse_batch(
 fn _native(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(parse, m)?)?;
     m.add_function(wrap_pyfunction!(parse_json, m)?)?;
+    m.add_function(wrap_pyfunction!(parse_lossless_json, m)?)?;
     m.add_function(wrap_pyfunction!(parse_file, m)?)?;
     m.add_function(wrap_pyfunction!(parse_file_json, m)?)?;
     m.add_function(wrap_pyfunction!(parse_batch, m)?)?;

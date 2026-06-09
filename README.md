@@ -146,7 +146,49 @@ print(get(msg, "OBX[2]-5"))       # "4.5"  (second OBX segment)
 print(all_values(msg, "OBX-5"))   # ["7.2", "4.5"]
 ```
 
-### 9. Annotated JSON — self-describing output with HL7 field names
+### 9. Get all repetitions of a repeating field
+
+`get()` returns only the first repetition of a repeating field. Use
+`field_reps()` when a single segment field holds multiple values separated
+by `~`, such as allergy reaction codes or repeating insurance identifiers.
+
+```python
+from rust_hl7_parser import parse, field_reps, get
+
+msg = parse(
+    "MSH|^~\\&|App|Fac|App|Fac|20230101||ADT^A01|1|P|2.3\r"
+    "AL1|1|DA|PENICILLIN^Penicillin|MO|RASH~HIVES~NAUSEA\r"
+    "AL1|2|FA|PEANUTS^Peanut allergy|SV|ANAPHYLAXIS"
+)
+
+# All reaction codes from the first AL1 segment
+reactions = field_reps(msg, "AL1-5")   # ["RASH", "HIVES", "NAUSEA"]
+
+# get() silently returns only the first
+get(msg, "AL1-5")                       # "RASH"
+
+# For the second AL1 segment (single reaction — still returns a list)
+field_reps(msg, "AL1[2]-5")            # ["ANAPHYLAXIS"]
+```
+
+For a segment with a repeating composite field (multiple structured values
+per field), `field_reps()` returns a list of component lists:
+
+```python
+msg = parse(
+    "MSH|^~\\&|App|Fac|App|Fac|20230101||ADT^A01|1|P|2.3\r"
+    "NK1|1|Smith^Jane~Jones^Bob|SPO"
+)
+
+reps = field_reps(msg, "NK1-2")
+# [["Smith", "Jane"], ["Jones", "Bob"]]
+
+# Iterate over all next-of-kin names
+for name in reps:
+    print(name[0], name[1])   # family, given
+```
+
+### 10. Annotated JSON — self-describing output with HL7 field names
 
 ```python
 from rust_hl7_parser import parse_annotated_json
@@ -171,11 +213,45 @@ print(pid5["value"]["given_name"])     # "John"
 
 | Function | Returns | Throughput | Best for |
 |----------|---------|------------|----------|
-| `parse_json()` | JSON string (positional) | ~31,000 msg/s | Maximum speed; downstream knows HL7 field positions |
-| `parse()` | Python dict (positional) | ~26,000 msg/s | Python code that needs to inspect/transform fields |
+| `parse_json()` | JSON string (positional, lossy) | ~31,000 msg/s | Maximum speed; downstream knows HL7 field positions |
+| `parse()` | Python dict (positional, lossy) | ~26,000 msg/s | Python code that needs to inspect/transform fields |
 | `parse()` + `get()` | Python values via HL7 path | ~25,000 msg/s | Python code using HL7 notation (`"PID-5.1"`) |
 | `parse()` + `validate()` | dict + validation result | ~16,000 msg/s | When you need schema validation |
-| `parse_annotated_json()` | Self-describing JSON | ~5,300 msg/s | Downstream systems that need field names in JSON |
+| `parse_annotated_json()` | Self-describing JSON (lossless) | ~5,300 msg/s | Downstream systems that need field names in JSON |
+| `parse_lossless_json()` | Structural JSON (lossless) | ~28,000 msg/s | Round-trip serialisation, diff/edit tools |
+
+### Lossy vs lossless
+
+`parse()` and `parse_json()` apply a **collapsing rule** at the Python
+boundary: single-item wrappers are unwrapped so that simple values surface
+as plain strings rather than nested structures. This makes the common case
+ergonomic but loses structural information:
+
+| HL7 input | Python output | Ambiguous? |
+|-----------|---------------|------------|
+| `A` | `"A"` | No |
+| `A^B^C` (components) | `["A", "B", "C"]` | Yes — same as below |
+| `A~B~C` (repetitions) | `["A", "B", "C"]` | Yes — same as above |
+| `A&B&C` (sub-components) | `["A", "B", "C"]` | Yes — same as above |
+| `A^B~C^D` (repeating composite) | `[["A","B"],["C","D"]]` | No |
+
+**Use `parse_annotated_json()`** when you need field names and types but not
+exact separator reconstruction. **Use `parse_lossless_json()`** when you
+need to know *which* separator was used or want to reconstruct the original
+HL7 text exactly.
+
+**`get()` and `all_values()`** are semantically safe for the most common
+ADT/ORM/ORU patterns (accessing named components like `PID-5.1`, iterating
+repeating segments via `all_values`). They inherit the Python-layer
+ambiguity for flat lists: `get(msg, "NK1-3.2")` cannot distinguish whether
+`["A", "B"]` represents two components or two repetitions. Use the `rep=`
+parameter for explicit repetition access, and `field_reps()` to retrieve all
+repetitions of a repeating field.
+
+**`field_reps()`** returns all repetitions of a field as a list. It is the
+correct tool for fields like `AL1-5` (allergy reaction codes), `IN1-3`
+(insurance company IDs), and any other field that repeats within a single
+segment. `get()` and `all_values()` return only the first repetition.
 
 All numbers from 5,000 real NHS HL7v2 messages (avg 1,792 chars). For comparison:
 - python-hl7: ~2,500 msg/s (parse only, no JSON output, no validation)
@@ -578,6 +654,50 @@ Each OBX segment is annotated independently. All three segments in the
 
 ---
 
+### Lossless output (`parse_lossless_json()`)
+
+`parse_lossless_json()` serialises the internal Rust parse tree without any
+collapsing.  Every field is always an object with a `repetitions` array;
+every repetition has a `components` array; every component has a
+`sub_components` array.  All three separator levels are always explicit.
+
+This makes it possible to distinguish `A^B` (components), `A~B`
+(repetitions), and `A&B` (sub-components), which all collapse to `["A","B"]`
+in the positional output.
+
+**Example:** `PID-5 = Doe^John^M` (single repetition, three components)
+
+```json
+{
+  "repetitions": [
+    {
+      "components": [
+        {"sub_components": ["Doe"]},
+        {"sub_components": ["John"]},
+        {"sub_components": ["M"]}
+      ]
+    }
+  ]
+}
+```
+
+**Example:** `AL1-5 = RASH~HIVES` (two simple repetitions)
+
+```json
+{
+  "repetitions": [
+    {"components": [{"sub_components": ["RASH"]}]},
+    {"components": [{"sub_components": ["HIVES"]}]}
+  ]
+}
+```
+
+These two produce identical output from `parse()` (`["Doe","John","M"]` and
+`["RASH","HIVES"]` respectively) — only `parse_lossless_json()` preserves the
+distinction.
+
+---
+
 ### Pydantic integration (consuming annotated JSON)
 
 With the typed format, component values are directly accessible as dict keys —
@@ -712,8 +832,9 @@ print(visit.model_dump_json(indent=2))
 
 | Function | Returns | Description |
 |----------|---------|-------------|
-| `parse(message, strict=True)` | `dict` | Parse single HL7v2 message |
-| `parse_json(message, strict=True)` | `str` | Parse to JSON string |
+| `parse(message, strict=True)` | `dict` | Parse single HL7v2 message. Lossy: single-item wrappers are collapsed. |
+| `parse_json(message, strict=True)` | `str` | Parse to JSON string. Same collapsing as `parse()`. |
+| `parse_lossless_json(message, strict=True)` | `str` | Parse to fully lossless JSON preserving all Field/Repetition/Component/SubComponent structure. For round-trip serialisation, diff tools, HL7 editors. |
 | `parse_file(path, strict=True)` | `list[dict]` | Parse a .hl7 file containing one or more messages |
 | `parse_file_json(path, strict=True)` | `str` | Parse file, return JSON array string |
 | `parse_batch(messages, strict=True)` | `list[dict]` | Parse a list of message strings |
@@ -721,10 +842,11 @@ print(visit.model_dump_json(indent=2))
 | `parse_file_to_json(path, strict=True)` | `bytes` | Parse file and return orjson bytes |
 | `parse_annotated(message, strict=True, version=None)` | `dict` | Parse with HL7 field names embedded in output |
 | `parse_annotated_json(message, strict=True, version=None)` | `str` | Same but returns JSON string |
-| `get(msg, path, default=None, rep=None)` | `str \| None` | Extract a value by HL7 path (e.g. `"PID-5.1"`) |
+| `get(msg, path, default=None, rep=None)` | `str \| None` | Extract a value by HL7 path (e.g. `"PID-5.1"`). Returns first repetition only. |
+| `field_reps(msg, path)` | `list` | All repetitions of a repeating field (e.g. `AL1-5`, `IN1-3`). |
 | `segments(msg, name)` | `list[dict]` | All segment dicts with the given name |
 | `field(seg, field_num, component=None)` | `str \| list \| None` | Low-level field access on a segment dict |
-| `all_values(msg, path)` | `list` | Collect a field value from every occurrence of a segment |
+| `all_values(msg, path)` | `list` | Collect a field value from every occurrence of a segment. Returns first repetition per segment. |
 | `first(msg, name)` | `dict \| None` | First segment with the given name, or None |
 | `validate(message_dict, strict=True, version=None)` | `dict` | Validate a parsed message dict |
 | `validate_file(path, strict=True)` | `list[dict]` | Validate all messages in a file |
