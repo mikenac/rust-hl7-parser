@@ -39,6 +39,6 @@ markers = [
 ]
 
 [tool.maturin]
-features = ["pyo3/extension-module", "pyo3/abi3-py313"]
+features = ["python", "pyo3/abi3-py313"]
 python-source = "python"
 module-name = "rust_hl7_parser._native"

@@ -4,13 +4,20 @@ version = "0.1.0"
 edition = "2024"
 description = "A fast HL7v2 parser written in Rust with Python bindings"
 license = "MIT"
+repository = "https://github.com/mikenac/rust-hl7-parser"
 
 [lib]
 name = "rust_hl7_parser"
 crate-type = ["cdylib", "rlib"]
 
+# The `python` feature builds the PyO3 extension module.
+# Disable it (`--no-default-features`) to use the crate as a pure Rust library.
+[features]
+default = ["python"]
+python = ["dep:pyo3", "pyo3/extension-module"]
+
 [dependencies]
-pyo3 = { version = "0.28", features = ["extension-module", "abi3-py313"] }
+pyo3 = { version = "0.28", features = ["abi3-py313"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
