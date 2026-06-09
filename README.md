@@ -217,7 +217,7 @@ print(pid5["value"]["given_name"])     # "John"
 | `parse()` | Python dict (positional, lossy) | ~26,000 msg/s | Python code that needs to inspect/transform fields |
 | `parse()` + `get()` | Python values via HL7 path | ~25,000 msg/s | Python code using HL7 notation (`"PID-5.1"`) |
 | `parse()` + `validate()` | dict + validation result | ~16,000 msg/s | When you need schema validation |
-| `parse_annotated_json()` | Self-describing JSON (semantic, not lossless) | ~5,300 msg/s | Downstream systems that need field names in JSON |
+| `parse_annotated_json()` | Self-describing JSON (semantic, not round-trip lossless) | ~5,300 msg/s | Downstream systems that need field names in JSON |
 | `parse_lossless_json()` | Structural JSON (lossless) | ~28,000 msg/s | Round-trip serialisation, diff/edit tools |
 
 ### Lossy vs lossless

@@ -295,6 +295,16 @@ fn parse_json(message: &str, strict: bool) -> PyResult<String> {
     }
 }
 
+/// Wrapper used by parse_lossless_json to include optional warnings alongside
+/// the serde-serialised message tree without a heap allocation or string manipulation.
+#[derive(serde::Serialize)]
+struct LosslessOutput<'a> {
+    #[serde(flatten)]
+    msg: &'a types::Hl7Message<'a>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    warnings: Vec<String>,
+}
+
 /// Parse an HL7v2 message and return a fully lossless JSON string.
 ///
 /// Unlike parse_json(), which collapses single-item wrappers (e.g. a field
@@ -311,8 +321,8 @@ fn parse_json(message: &str, strict: bool) -> PyResult<String> {
 ///   ``A&B`` (sub-components) — all three collapse to ``["A","B"]`` in
 ///   parse_json() but are distinct in this output.
 ///
-/// Warnings from lenient mode are not included; call parse(strict=False) if
-/// you also need the warnings list.
+/// When strict=False, a ``"warnings"`` key is included in the output when any
+/// segments were skipped, consistent with parse_json() behaviour.
 ///
 /// Parameters
 /// ----------
@@ -340,7 +350,7 @@ fn parse_lossless_json(message: &str, strict: bool) -> PyResult<String> {
         error::ParseMode::Lenient
     };
     match parser::parse(message, mode) {
-        Ok((msg, _)) => serde_json::to_string(&msg)
+        Ok((msg, warnings)) => serde_json::to_string(&LosslessOutput { msg: &msg, warnings })
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string())),
         Err(e) => Err(pyo3::exceptions::PyValueError::new_err(e.message)),
     }
