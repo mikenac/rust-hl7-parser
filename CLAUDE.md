@@ -12,7 +12,7 @@ healthcare data pipelines where parsing throughput or correctness guarantees mat
 | Layer       | Technology                                    |
 |-------------|-----------------------------------------------|
 | Parser      | Rust 2021 + `str::split` (no combinator libs) |
-| Python API  | PyO3 0.23 + maturin                           |
+| Python API  | PyO3 0.28 + maturin (optional `python` feature) |
 | Serialise   | serde + serde_json                            |
 | Tests       | pytest (Python), built-in `#[test]` (Rust)    |
 
@@ -38,15 +38,18 @@ maturin build --release
 
 ### Notes on the build configuration
 
-`pyproject.toml` passes `--cfg pyo3_disable_reference_pool` via `rustc-args`. This
-disables PyO3's global reference pool, which uses a Mach-O constructor function that
-fires before Python initialises its thread state on macOS. Without this flag the
-extension aborts on import with "PyInterpreterState_Get: GIL is released".
+The `python` Cargo feature (default) pulls in pyo3 with `extension-module` and
+compiles `src/python_bindings.rs`. Disable it for a pure-Rust library build:
 
-The `abi3-py39` feature produces a single `_native.abi3.so` compatible with all
-CPython 3.9+ versions. If a stale `_native.cpython-XYZ-darwin.so` from a previous
-non-abi3 build exists alongside it, Python will prefer the versioned file and crash
-if it was linked against a different libpython. Delete any such stale files or run
+```bash
+cargo build --no-default-features
+```
+
+`pyo3/abi3-py313` is passed by maturin via `pyproject.toml` and produces a
+single `_native.abi3.so` compatible with all CPython 3.13+ versions. If a
+stale `_native.cpython-XYZ-darwin.so` from a previous non-abi3 build exists
+alongside it, Python will prefer the versioned file and crash if it was linked
+against a different libpython. Delete any such stale files or run
 `maturin develop` again which overwrites them.
 
 **`.cargo/config.toml` — macOS linker flags for bare `cargo test`**
@@ -96,33 +99,34 @@ parsing. `tests/test_file_parsing.py` covers `parse_file`, `parse_file_json`, an
 
 ```
 src/
-  types.rs    — Rust data model: Hl7Message / Hl7Segment / Hl7Field /
+  types.rs    — pub: Rust data model: Hl7Message / Hl7Segment / Hl7Field /
                 Hl7Repetition / Hl7Component. All types derive serde::Serialize.
 
-  error.rs    — ParseError, ParseMode (Strict / Lenient), LenientResult<T>.
+  error.rs    — pub: ParseError, ParseMode (Strict / Lenient), LenientResult<T>.
 
-  parser.rs   — Bottom-up parser using str::split (no Winnow combinators):
+  parser.rs   — pub: Bottom-up parser using str::split (no Winnow combinators):
                   sub_component → component → repetition → field → segment → message
                 MSH is handled specially (MSH-1 = field sep, MSH-2 = encoding chars).
                 Escape-sequence expansion (\F\, \S\, \R\, \E\, \T\).
                 split_lines() accepts \r, \n, \r\n; strips MLLP framing bytes.
                 parse_strict() / parse_lenient() / parse() public entry points.
-                group_messages() — splits file content into individual messages;
-                  handles blank-line separators and MSH-restart detection.
-                parse_messages() — batch-parses all messages from file content;
+                group_message_lines() — splits file content into borrowed line-slice
+                  groups, one group per message. Handles blank-line separators,
+                  MSH-restart detection, and MLLP framing.
+                parse_message_groups() — batch-parses pre-grouped messages;
                   returns Vec of results, one per message.
 
-  lib.rs      — PyO3 module. Defines the `_native` extension module with five
-                exported functions: parse(), parse_json(), parse_file(),
-                parse_file_json(), and parse_batch().
+  lib.rs      — Crate root. Re-exports pub mod error / parser / types.
+                Conditionally includes python_bindings under the `python` feature.
+                Rust consumers depend on this crate with default-features = false.
+
+  python_bindings.rs — Compiled only with the `python` feature.
+                Defines the `_native` PyO3 extension module with six exported
+                functions: parse(), parse_json(), parse_lossless_json(),
+                parse_file(), parse_file_json(), parse_batch().
                 Implements structure-collapsing: single sub-component → str,
                 single component → collapsed, single repetition → collapsed.
-                parse_file(path, strict=True) — reads a .hl7 file, splits into
-                  messages, returns a list of parsed message dicts.
-                parse_file_json(path, strict=True) — same but returns a JSON
-                  array string; avoids Python dict construction overhead.
-                parse_batch(messages, strict=True) — parses a list of message
-                  strings; each element is a complete HL7 message.
+                Direct JSON write path (no serde_json::Value intermediates).
 
 python/
   rust_hl7_parser/

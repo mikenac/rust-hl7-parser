@@ -8,17 +8,22 @@ A fast HL7v2 message parser written in Rust with Python bindings.
 
 - **10x faster than python-hl7, 255x faster than hl7apy** (parse + validate) — see benchmarks below
 - **Zero-copy Rust parser via PyO3** — returns native Python dicts with no intermediate representations
+- **Usable as a pure Rust library** — `pub mod parser / types / error`; PyO3 bindings are opt-in via the `python` feature
 - **Lenient mode** skips malformed segments and reports structured warnings instead of raising
 - **JSON output path** (`parse_json`, `parse_file_json`) avoids Python dict construction overhead entirely
+- **Lossless JSON output** (`parse_lossless_json`) preserves the full Field → Repetition → Component → SubComponent tree for round-trip and diff use cases
 - **Typed annotated JSON output** (`parse_annotated_json`) embeds HL7 field names, type codes, and flat component dicts in every value for self-describing JSON
 - **HL7 path accessor** (`get(msg, "PID-5.1")`) — extract fields using standard HL7 notation
+- **All-repetitions accessor** (`field_reps(msg, "AL1-5")`) — returns every `~`-separated repetition of a field
 - **File parsing** with automatic message splitting: blank-line separation, MSH-restart detection, MLLP framing stripped automatically
 - **Batch parsing** for in-memory message lists via `parse_batch`
 - **HL7v2 version-aware validation** covering versions 2.1 through 2.9, 16 message types, ~40 segments per version
 - **PEP 561 typed** — ships `py.typed`, full type annotations
-- **Single abi3 wheel** compatible with CPython 3.9+
+- **Single abi3 wheel** compatible with CPython 3.13+
 
 ## Installation
+
+### Python
 
 ```
 pip install rust-hl7-parser
@@ -28,10 +33,123 @@ pip install rust-hl7-parser
 
 ```bash
 pip install maturin
-git clone https://github.com/mike-nacey/rust-hl7-parser
+git clone https://github.com/mikenac/rust-hl7-parser
 cd rust-hl7-parser
 maturin develop
 pytest tests/
+```
+
+### Rust library
+
+To use the parser from Rust without the Python bindings, disable the default
+`python` feature:
+
+```toml
+# Cargo.toml
+[dependencies]
+rust-hl7-parser = { git = "https://github.com/mikenac/rust-hl7-parser", default-features = false }
+```
+
+## Rust quick start
+
+The three public modules mirror the internal structure exactly:
+
+| Module | Contents |
+|--------|----------|
+| `rust_hl7_parser::parser` | `parse()`, `parse_lenient()`, `group_message_lines()`, `parse_message_groups()` |
+| `rust_hl7_parser::types` | `Hl7Message`, `Hl7Segment`, `Hl7Field`, `Hl7Repetition`, `Hl7Component` |
+| `rust_hl7_parser::error` | `ParseMode`, `ParseError`, `LenientResult` |
+
+### Basic parse
+
+```rust
+use rust_hl7_parser::{parser, error::ParseMode};
+
+let raw = "MSH|^~\\&|SendingApp|SendingFac|RecvApp|RecvFac|20230101||ADT^A01|MSG001|P|2.3\r\
+           PID|1||12345^^^MRN||Doe^John^M||19800101|M\r\
+           PV1|1|I|ICU^Bed1^Main";
+
+let (msg, _warnings) = parser::parse(raw, ParseMode::Strict).unwrap();
+
+println!("{}", msg.segments[0].name);   // "MSH"
+println!("{}", msg.segments.len());     // 3
+```
+
+### Navigating the type tree
+
+The Rust representation is always fully structured — no collapsing:
+
+```rust
+use rust_hl7_parser::{parser, error::ParseMode};
+
+let raw = "MSH|^~\\&|App|Fac|App|Fac|20230101||ADT^A01|1|P|2.3\r\
+           PID|1||12345^^^MRN||Doe^John^M";
+
+let (msg, _) = parser::parse(raw, ParseMode::Strict).unwrap();
+
+let pid = &msg.segments[1];
+
+// PID-5 = Doe^John^M: one repetition, three components, each a scalar sub-component
+let pid5 = &pid.fields[4];                              // zero-indexed
+let rep   = &pid5.repetitions[0];
+let family = rep.components[0].sub_components[0].as_ref(); // "Doe"
+let given  = rep.components[1].sub_components[0].as_ref(); // "John"
+
+// PID-3 = 12345^^^MRN: CX datatype — four components, sub-component [0] each
+let pid3      = &pid.fields[2];
+let id_number = pid3.repetitions[0].components[0].sub_components[0].as_ref(); // "12345"
+let authority = pid3.repetitions[0].components[3].sub_components[0].as_ref(); // "MRN"
+```
+
+### Lenient mode and warnings
+
+```rust
+use rust_hl7_parser::{parser, error::ParseMode};
+
+let raw = "MSH|^~\\&|App|Fac|App|Fac|20230101||ADT^A01|1|P|2.3\r\
+           BA\r\
+           PID|1||12345";
+
+let (msg, warnings) = parser::parse(raw, ParseMode::Lenient).unwrap();
+
+println!("{}", msg.segments.len());   // 2 — MSH + PID (BA skipped)
+println!("{}", warnings[0]);          // "Skipping malformed segment..."
+```
+
+### Repeating fields
+
+```rust
+use rust_hl7_parser::{parser, error::ParseMode};
+
+let raw = "MSH|^~\\&|App|Fac|App|Fac|20230101||ADT^A01|1|P|2.3\r\
+           AL1|1|DA|PENICILLIN|MO|RASH~HIVES~NAUSEA";
+
+let (msg, _) = parser::parse(raw, ParseMode::Strict).unwrap();
+
+let al1   = &msg.segments[1];
+let al1_5 = &al1.fields[4];   // zero-indexed
+
+// Three repetitions, each a scalar
+for rep in &al1_5.repetitions {
+    let reaction = rep.components[0].sub_components[0].as_ref();
+    println!("{}", reaction);   // RASH, then HIVES, then NAUSEA
+}
+```
+
+### Batch and file parsing
+
+```rust
+use rust_hl7_parser::{parser, error::ParseMode};
+
+// Parse a multi-message file
+let content = std::fs::read_to_string("messages.hl7").unwrap();
+let groups  = parser::group_message_lines(&content);
+let results = parser::parse_message_groups(&groups, ParseMode::Lenient);
+
+for (i, result) in results.into_iter().enumerate() {
+    let (msg, warnings) = result.unwrap();
+    println!("Message {}: {} segments, {} warnings", i, msg.segments.len(), warnings.len());
+}
 ```
 
 ## Quick start
