@@ -242,13 +242,14 @@ dicts rather than preserved as positional arrays. **Use
 `parse_lossless_json()`** when you need to know *which* separator was used
 or want to reconstruct the original HL7 text exactly.
 
-**`get()` and `all_values()`** are semantically safe for the most common
-ADT/ORM/ORU patterns (accessing named components like `PID-5.1`, iterating
-repeating segments via `all_values`). They inherit the Python-layer
-ambiguity for flat lists: `get(msg, "NK1-3.2")` cannot distinguish whether
-`["A", "B"]` represents two components or two repetitions. Use the `rep=`
-parameter for explicit repetition access, and `field_reps()` to retrieve all
-repetitions of a repeating field.
+**`get()` and `all_values()`** are safe when used with explicit HL7 path
+notation — `get(msg, "PID-5.1")`, `get(msg, "PV1-3.4")`, and similar always
+return the correct value regardless of how the underlying field was
+represented. Ambiguity only arises when code inspects the raw collapsed
+Python structures directly (e.g. indexing `msg["segments"][n]["fields"][m]`
+by hand on a field that could be either repeating or composite). Use the
+`rep=` parameter on `get()` for explicit repetition access, and `field_reps()`
+to retrieve all repetitions of a repeating field.
 
 **`field_reps()`** returns all repetitions of a field as a list. It is the
 correct tool for fields like `AL1-5` (allergy reaction codes), `IN1-3`
