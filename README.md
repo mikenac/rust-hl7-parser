@@ -331,12 +331,14 @@ print(pid5["value"]["given_name"])     # "John"
 
 | Function | Returns | Throughput | Best for |
 |----------|---------|------------|----------|
-| `parse_json()` | JSON string (positional, lossy) | ~31,000 msg/s | Maximum speed; downstream knows HL7 field positions |
-| `parse()` | Python dict (positional, lossy) | ~26,000 msg/s | Python code that needs to inspect/transform fields |
-| `parse()` + `get()` | Python values via HL7 path | ~25,000 msg/s | Python code using HL7 notation (`"PID-5.1"`) |
-| `parse()` + `validate()` | dict + validation result | ~16,000 msg/s | When you need schema validation |
-| `parse_annotated_json()` | Self-describing JSON (semantic, not round-trip lossless) | ~5,300 msg/s | Downstream systems that need field names in JSON |
-| `parse_lossless_json()` | Structural JSON (lossless) | ~28,000 msg/s | Round-trip serialisation, diff/edit tools |
+| `parse_json()` | JSON string (positional, lossy) | ~6,300 msg/s | Maximum speed; downstream knows HL7 field positions |
+| `parse()` | Python dict (positional, lossy) | ~6,500 msg/s | Python code that needs to inspect/transform fields |
+| `parse()` + `get()` | Python values via HL7 path | ~6,000 msg/s | Python code using HL7 notation (`"PID-5.1"`) |
+| `parse()` + `validate()` | dict + validation result | ~5,300 msg/s | When you need schema validation |
+| `parse_annotated_json()` | Self-describing JSON (semantic, not round-trip lossless) | ~3,300 msg/s | Downstream systems that need field names in JSON |
+| `parse_lossless_json()` | Structural JSON (lossless) | ~1,450 msg/s | Round-trip serialisation, diff/edit tools |
+| `parse_hl7apy_compat()` | hl7apy-format dict + JSON | ~1,160 msg/s | Drop-in replacement for hl7apy `extract_message` |
+| hl7apy `extract_message` | hl7apy-format dict + JSON | ~90 msg/s | (baseline — 13× slower than `parse_hl7apy_compat`) |
 
 ### Lossy vs lossless
 
@@ -975,19 +977,25 @@ print(visit.model_dump_json(indent=2))
 
 ## Benchmarks
 
-Benchmarked against 5,000 real NHS HL7v2 messages (average 1,792 characters each):
+Benchmarked against 2,000 real NHS HL7v2 messages (average 1,805 characters each):
 
 ```
-Pipeline                                  Throughput     Relative
-parse_json() — positional JSON            31,190 msg/s   fastest
-parse() — Python dict                     26,494 msg/s   baseline
-parse() + get() — HL7 path accessor      ~25,000 msg/s   accessor overhead negligible
-parse_batch() — batch mode               20,797 msg/s   batch overhead
-parse() + validate()                     16,407 msg/s   with schema validation
-parse_annotated_json() — self-describing  5,254 msg/s   self-describing JSON
-python-hl7 (parse only)                   2,530 msg/s   10x slower
-hl7apy (parse + validate)                   102 msg/s   255x slower, no JSON output
+Pipeline                                  Throughput     Relative to hl7apy extract
+parse() — Python dict                      6,514 msg/s   72x
+parse_json() — positional JSON             6,260 msg/s   70x
+parse() + validate()                       5,278 msg/s   59x
+parse_annotated_json() — self-describing   3,293 msg/s   37x
+parse_lossless_json() — structural         1,453 msg/s   16x
+parse_hl7apy_compat() — compat shim        1,159 msg/s   13x
+python-hl7 (parse only)                      ~600 msg/s    7x
+hl7apy parse_message() only                  110 msg/s    1.2x
+hl7apy full extract_message()                 90 msg/s   baseline
 ```
+
+`parse_hl7apy_compat()` uses `parse_lossless_json()` internally to correctly
+distinguish repeating fields from composite fields.  The ~20% overhead over
+the raw lossless output is the Python-side field-key mapping and dict
+construction.
 
 Run the benchmark yourself:
 
