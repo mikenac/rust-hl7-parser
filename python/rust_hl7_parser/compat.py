@@ -58,18 +58,70 @@ On failure::
 
     {"error": "<message>", "status": "Failed" | "Skipped" | "Fatal"}
 
-Notes
------
+Caller pre-processing requirements
+-----------------------------------
 
-The original hl7apy-based function applies two pre-processing steps that are
-caller responsibilities here:
+The original hl7apy-based ``extract_message`` function applies two
+pre-processing steps before parsing.  This function does **not** apply
+them automatically — they are caller responsibilities because whether they
+are needed depends on the source of the data.
 
-1. ``hl7_str.encode("utf-8").decode("unicode_escape")`` — decodes
-   double-escaped strings from some Foundry sources.
-2. ``normalize_hl7_version(hl7_str)`` — rewrites legacy version strings.
+**Step 1 — Unicode escape decoding**
 
-Apply those transforms before calling this function if your input requires
-them.
+Some Foundry function inputs arrive with the segment terminators
+double-escaped: the literal four characters ``\\r`` (backslash + r) instead
+of an actual carriage-return character.  The original function decodes this
+with::
+
+    hl7_str = hl7_str.encode("utf-8").decode("unicode_escape")
+
+Apply this step when your input comes from a Foundry Object Function or AIP
+agent that serialises the message as a Python repr string rather than a raw
+HL7 byte stream.  You can detect the need for it by checking whether the
+string contains the literal ``\\r``::
+
+    if "\\r" in hl7_str and "\\n" not in hl7_str and "\r" not in hl7_str:
+        hl7_str = hl7_str.encode("utf-8").decode("unicode_escape")
+
+Do **not** apply it unconditionally — on a message that already contains
+real CR characters the decode step produces garbage.
+
+**Step 2 — HL7 version normalisation**
+
+Some source systems write non-standard version strings in MSH-12, for
+example ``"2.3.1"`` as ``"2.31"``, ``"v2.4"``, or ``"02.5"``.  The
+original function passes the string through ``normalize_hl7_version()``
+(from ``parsing.helper``) before calling the parser, which rewrites these
+to the canonical form expected by the schema registry.
+
+Apply the equivalent normalisation before calling this function if your
+source systems are known to produce non-standard version strings.  A simple
+guard that handles common cases::
+
+    import re
+    def normalize_hl7_version(hl7_str: str) -> str:
+        # Rewrite the version field in the MSH segment only.
+        return re.sub(
+            r'(MSH(?:\\|[^|\\r]*){11})([^|\\r]+)',
+            lambda m: m.group(1) + m.group(2).lstrip("vV").replace(" ", ""),
+            hl7_str,
+            count=1,
+        )
+
+**Full pre-processing pattern**::
+
+    from rust_hl7_parser import parse_hl7apy_compat
+
+    def extract_message(hl7_str: str) -> dict:
+        # Step 1: decode double-escaped separators if present
+        if "\\\\r" in hl7_str:
+            hl7_str = hl7_str.encode("utf-8").decode("unicode_escape")
+
+        # Step 2: normalise non-standard version strings (if your source
+        # systems require it)
+        hl7_str = normalize_hl7_version(hl7_str)
+
+        return parse_hl7apy_compat(hl7_str, strict=True)
 """
 
 from __future__ import annotations
@@ -193,9 +245,27 @@ def parse_hl7apy_compat(hl7_str: str, *, strict: bool = True) -> dict[str, Any]:
     Parameters
     ----------
     hl7_str:
-        Raw HL7v2 message text.  ``\\n`` is normalised to ``\\r`` automatically.
-        Double-escaped strings (``\\\\r``) and version normalisation are the
-        caller's responsibility — apply before calling this function if needed.
+        Raw HL7v2 message text.  ``\\n`` line endings are normalised to ``\\r``
+        automatically.
+
+        Two pre-processing steps from the original ``extract_message`` function
+        are **not** applied here and remain the caller's responsibility:
+
+        1. **Unicode escape decoding** — if the message contains the literal
+           four characters ``\\\\r`` (double-escaped carriage return) rather than
+           a real CR, decode it first::
+
+               hl7_str = hl7_str.encode("utf-8").decode("unicode_escape")
+
+           Apply only when needed; applying unconditionally to a message that
+           already has real CR characters produces garbage.
+
+        2. **Version string normalisation** — if MSH-12 may contain
+           non-standard version strings (``"v2.4"``, ``"2.31"``, etc.), run
+           your ``normalize_hl7_version()`` helper before calling this
+           function.
+
+        See the module-level docstring for a complete pre-processing pattern.
     strict:
         When ``True`` (default) raise on any parse error, returning
         ``{"error": ..., "status": "Failed"}``.
