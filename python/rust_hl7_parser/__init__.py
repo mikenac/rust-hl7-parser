@@ -81,6 +81,14 @@ parse_annotated(message, *, strict=True, version=None) -> dict
 parse_annotated_json(message, *, strict=True, version=None) -> str
     Parse an HL7v2 message and return annotated JSON with HL7 field names.
 
+parse_hl7apy_compat(message, *, strict=True) -> dict
+    Parse an HL7v2 message and return output compatible with the hl7apy-based
+    ``extract_message`` Foundry function.  Field keys use the ``SEGMENT_N``
+    convention (e.g. ``PID_5``).  Repeating scalar fields are wrapped as
+    ``[["A"], ["B"]]`` to match the hl7apy normalisation.  Returns
+    ``{"parsed_message": "<JSON>", "status": "Processed"}`` on success or
+    ``{"error": "...", "status": "..."}`` on failure.
+
 All functions accept an optional ``strict`` keyword argument (default
 ``True``).  When ``strict=False`` the parser operates in lenient mode:
 malformed segments are skipped and a ``"warnings"`` key is added to the
@@ -110,6 +118,7 @@ from rust_hl7_parser._native import parse, parse_json, parse_lossless_json, pars
 from rust_hl7_parser.validator import validate, validate_file, validate_file_summary
 from rust_hl7_parser.accessor import get, segments, field, field_reps, all_values, first
 from rust_hl7_parser.annotator import parse_annotated, parse_annotated_json
+from rust_hl7_parser.compat import parse_hl7apy_compat
 
 
 def parse_to_json(message: str, *, strict: bool = True) -> bytes:
@@ -177,5 +186,6 @@ __all__ = [
     "first",
     "parse_annotated",
     "parse_annotated_json",
+    "parse_hl7apy_compat",
 ]
 __version__ = "0.1.0"
